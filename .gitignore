@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+.venv/
+.DS_Store
+npm-debug.log
+
+# Internal docs (not for public repo)
+context.md
+specs.md
+agents.md
+front.md

@@ -1,0 +1,11 @@
+services:
+  ropa-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ropa-backend
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env
+    restart: unless-stopped
