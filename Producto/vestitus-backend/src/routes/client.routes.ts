@@ -6,6 +6,38 @@ import * as clientController from '@controllers/client.controller';
 
 const router = Router();
 
+/**
+ * @swagger
+ * /clients:
+ *   get:
+ *     tags: [Clientes]
+ *     summary: Listar clientes
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Lista de clientes
+ *   post:
+ *     tags: [Clientes]
+ *     summary: Crear cliente
+ *     security: [{ bearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name]
+ *             properties:
+ *               name: { type: string }
+ *               email: { type: string }
+ *               phone: { type: string }
+ *               address: { type: string }
+ *               client_type: { type: string, enum: [natural, empresa, agrupacion] }
+ *               tax_document: { type: string }
+ *     responses:
+ *       201:
+ *         description: Cliente creado
+ */
 router.get('/', authenticate, authorize('admin', 'employee'), clientController.getClients);
 router.get('/:id', authenticate, authorize('admin', 'employee'), clientController.getClientById);
 router.post('/', authenticate, validate(clientSchema), clientController.createClient);

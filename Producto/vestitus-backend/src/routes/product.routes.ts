@@ -19,6 +19,51 @@ const upload = multer({
   }
 });
 
+/**
+ * @swagger
+ * /products:
+ *   get:
+ *     tags: [Productos]
+ *     summary: Listar productos (con filtros)
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         schema: { type: string }
+ *         description: Filtrar por categoría
+ *       - in: query
+ *         name: type
+ *         schema: { type: string }
+ *         description: Filtrar por tipo (arriendo/venta)
+ *       - in: query
+ *         name: available
+ *         schema: { type: boolean }
+ *         description: Filtrar por disponibilidad
+ *     responses:
+ *       200:
+ *         description: Lista de productos
+ *   post:
+ *     tags: [Productos]
+ *     summary: Crear producto
+ *     security: [{ bearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, price]
+ *             properties:
+ *               name: { type: string }
+ *               description: { type: string }
+ *               category: { type: string }
+ *               type: { type: string, enum: [arriendo, venta] }
+ *               price: { type: number }
+ *               stock_quantity: { type: integer }
+ *               condition: { type: string }
+ *     responses:
+ *       201:
+ *         description: Producto creado
+ */
 router.get('/', productController.getProducts);
 router.get('/:id', productController.getProductById);
 router.post('/', authenticate, authorize('admin', 'employee'), validate(productSchema), productController.createProduct);
