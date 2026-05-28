@@ -56,4 +56,4 @@ Portafolio/
 | Swagger UI | `https://portafolio-gdp.onrender.com/api/docs` |
 | Frontend (próxima fase) | TBD |
 
-> Swagger está protegido con token de acceso. Consultar al equipo para credenciales de prueba.
+> Swagger está protegido con token de acceso. Consultar al equipo para credenciales.
