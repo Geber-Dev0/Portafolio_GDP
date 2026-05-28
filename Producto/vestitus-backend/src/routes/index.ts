@@ -14,6 +14,27 @@ import damageTypeRoutes from './damage-type.routes';
 
 const router = Router();
 
+/**
+ * @swagger
+ * /check-availability:
+ *   post:
+ *     tags: [Productos]
+ *     summary: Verificar disponibilidad de un producto en un rango de fechas
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [product_id, start_date, end_date]
+ *             properties:
+ *               product_id: { type: string, format: uuid }
+ *               start_date: { type: string, format: date }
+ *               end_date: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Resultado de disponibilidad
+ */
 router.post('/check-availability', validate(availabilitySchema), checkAvailability);
 
 router.use('/auth', authRoutes);

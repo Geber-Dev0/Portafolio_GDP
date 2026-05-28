@@ -24,7 +24,8 @@
       "@utils/*": ["src/utils/*"],
       "@types/*": ["src/types/*"],
       "@middleware/*": ["src/middleware/*"],
-      "@validators/*": ["src/validators/*"]
+      "@validators/*": ["src/validators/*"],
+      "@swagger": ["src/swagger.ts"]
     }
   },
   "include": ["src/**/*"],

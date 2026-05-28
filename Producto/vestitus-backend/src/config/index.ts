@@ -19,7 +19,8 @@ const config = {
   cloudinaryApiKey: required('CLOUDINARY_API_KEY'),
   cloudinaryApiSecret: required('CLOUDINARY_API_SECRET'),
   nodeEnv: process.env.NODE_ENV || 'development',
-  corsOrigins: process.env.CORS_ORIGINS || 'http://localhost:3000'
+  corsOrigins: process.env.CORS_ORIGINS || 'http://localhost:3000',
+  swaggerAccessToken: process.env.SWAGGER_ACCESS_TOKEN || ''
 };
 
 export default config;

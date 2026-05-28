@@ -49,4 +49,15 @@ Portafolio/
 
 ## Enlaces
 
-- Repositorio: [https://github.com/Geber-Dev0/Portafolio_GDP.git](https://github.com/Geber-Dev0/Portafolio_GDP.git)
+| Recurso | URL |
+|---------|-----|
+| Repositorio | [https://github.com/Geber-Dev0/Portafolio_GDP.git](https://github.com/Geber-Dev0/Portafolio_GDP.git) |
+| API (producción) | `https://portafolio-gdp.onrender.com/api` |
+| Swagger UI | `https://portafolio-gdp.onrender.com/api/docs` |
+| Frontend (próxima fase) | TBD |
+
+## Documentación para frontend
+
+Ver [`Producto/vestitus-backend/front.md`](Producto/vestitus-backend/front.md) con instrucciones detalladas de conexión, endpoints, autenticación y ejemplos.
+
+> Swagger está protegido con token de acceso. Consultar al equipo para credenciales de prueba.

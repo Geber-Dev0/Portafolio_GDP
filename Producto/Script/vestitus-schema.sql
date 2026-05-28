@@ -345,7 +345,7 @@ $$;
 -- TEST DATA
 -- ============================================================
 
--- Admin user (password: test1234, bcrypt hash)
+-- Seed admin user (bcrypt hash)
 INSERT INTO users (email, password_hash, role) VALUES
   ('admin@tienda.cl', '$2b$12$LJ3m4ys3Lk0TSwHnbfOMiOXPm1Qlq5Gz0YhGv0G0O0t0H0s0K0O', 'admin')
 ON CONFLICT (email) DO NOTHING;
