@@ -12,7 +12,22 @@ import { swaggerAuth, swaggerLogin } from '@middleware/swagger-auth.middleware';
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https:"],
+      imgSrc: ["'self'", "data:", "https:"],
+      fontSrc: ["'self'", "https:", "data:"],
+      connectSrc: ["'self'", "https:"],
+      formAction: ["'self'"],
+      frameAncestors: ["'self'"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"]
+    }
+  }
+}));
 
 const corsOrigins = config.nodeEnv === 'production'
   ? config.corsOrigins.split(',').map(s => s.trim())
