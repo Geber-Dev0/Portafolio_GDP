@@ -18,11 +18,10 @@ const router = Router();
  *         application/json:
  *           schema:
  *             type: object
- *             required: [email, password, name]
+ *             required: [email, password]
  *             properties:
  *               email: { type: string, example: usuario@ejemplo.cl }
- *               password: { type: string, example: "123456" }
- *               name: { type: string, example: Juan Perez }
+ *               password: { type: string, example: "••••••••" }
  *     responses:
  *       201:
  *         description: Usuario creado exitosamente
@@ -43,8 +42,8 @@ router.post('/register', validate(registerSchema), authController.register);
  *             type: object
  *             required: [email, password]
  *             properties:
- *               email: { type: string, example: admin@tienda.cl }
- *               password: { type: string, example: test1234 }
+ *               email: { type: string, example: usuario@ejemplo.cl }
+ *               password: { type: string, example: "••••••••" }
  *     responses:
  *       200:
  *         description: Login exitoso, devuelve JWT
