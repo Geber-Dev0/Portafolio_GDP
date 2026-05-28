@@ -17,7 +17,8 @@ const options: swaggerJsdoc.Options = {
         bearerAuth: {
           type: 'http',
           scheme: 'bearer',
-          bearerFormat: 'JWT'
+          bearerFormat: 'JWT',
+          description: 'Token JWT obtenido al iniciar sesión en /auth/login'
         }
       }
     }

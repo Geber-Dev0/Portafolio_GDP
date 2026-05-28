@@ -7,6 +7,7 @@ import config from '@config';
 import routes from '@routes/index';
 import swaggerSpec from '@swagger';
 import { errorHandler } from '@utils/error.middleware';
+import { swaggerAuth } from '@middleware/swagger-auth.middleware';
 
 const app = express();
 
@@ -50,8 +51,13 @@ app.get('/api/health', (_req, res) => {
   res.json({ success: true, message: 'OK', timestamp: new Date().toISOString() });
 });
 
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.get('/api/docs.json', (_req, res) => res.json(swaggerSpec));
+const swaggerOptions = {
+  swaggerOptions: { locale: 'es' },
+  customSiteTitle: 'Vestitus API - Documentación'
+};
+
+app.use('/api/docs', swaggerAuth, swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerOptions));
+app.get('/api/docs.json', swaggerAuth, (_req, res) => res.json(swaggerSpec));
 
 app.use('/api', routes);
 
