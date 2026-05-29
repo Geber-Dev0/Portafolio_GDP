@@ -9,7 +9,8 @@ export const getProducts = async (req: Request, res: Response) => {
       is_available: req.query.available !== undefined ? req.query.available === 'true' : undefined
     };
     const products = await productService.findProducts(filters);
-    res.json({ success: true, data: products });
+    const mapped = products.map(p => ({ ...p, images: p.product_images || [] }));
+    res.json({ success: true, data: mapped });
   } catch {
     res.status(500).json({ success: false, message: 'Error al obtener productos' });
   }
@@ -19,7 +20,7 @@ export const getProductById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const product = await productService.findProductById(id);
-    res.json({ success: true, data: product });
+    res.json({ success: true, data: { ...product, images: product.product_images || [] } });
   } catch {
     res.status(404).json({ success: false, message: 'Producto no encontrado' });
   }

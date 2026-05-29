@@ -19,7 +19,7 @@ export interface ProductFilters {
 }
 
 export const findProducts = async (filters?: ProductFilters) => {
-  let query = supabase.from('products').select('*');
+  let query = supabase.from('products').select('*, product_images(*)');
 
   if (filters?.category) {
     query = query.eq('category', filters.category);
