@@ -14,7 +14,7 @@ export interface SalePayload {
 export const findSales = async () => {
   const { data, error } = await supabase
     .from('sales')
-    .select('*, clients(name, email), products(name)')
+    .select('*, clients(*), products(*, product_images(*))')
     .order('created_at', { ascending: false });
   if (error) throw error;
   return data;
