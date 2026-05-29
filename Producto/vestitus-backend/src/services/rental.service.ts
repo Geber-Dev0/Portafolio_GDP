@@ -34,7 +34,7 @@ function calculateRentalPrice(dailyRate: number, days: number, periodType: strin
 export const findRentals = async () => {
   const { data, error } = await supabase
     .from('rentals')
-    .select('*, clients(name, email), products(name, price)')
+    .select('*, clients(*), products(*, product_images(*))')
     .order('created_at', { ascending: false });
   if (error) throw error;
   return data;
