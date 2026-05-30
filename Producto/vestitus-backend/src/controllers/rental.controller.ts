@@ -26,7 +26,7 @@ export const getSelfRentals = async (req: Request, res: Response) => {
     const rentals = await rentalService.findRentalsByClientId(client.id);
     const mapped = rentals.map(r => ({
       ...r,
-      product: r.product ? { ...r.product, images: (r.product as any).product_images || [] } : r.product,
+      product: r.products ? { ...r.products, images: (r.products as any).product_images || [] } : r.products,
     }));
     res.json({ success: true, data: mapped });
   } catch {
@@ -39,7 +39,7 @@ export const getRentals = async (_req: Request, res: Response) => {
     const rentals = await rentalService.findRentals();
     const mapped = rentals.map(r => ({
       ...r,
-      product: r.product ? { ...r.product, images: (r.product as any).product_images || [] } : r.product,
+      product: r.products ? { ...r.products, images: (r.products as any).product_images || [] } : r.products,
     }));
     res.json({ success: true, data: mapped });
   } catch {
@@ -53,7 +53,7 @@ export const getRentalById = async (req: Request, res: Response) => {
     const rental = await rentalService.findRentalById(id);
     const mapped = {
       ...rental,
-      product: rental.product ? { ...rental.product, images: (rental.product as any).product_images || [] } : rental.product,
+      product: rental.products ? { ...rental.products, images: (rental.products as any).product_images || [] } : rental.products,
     };
     res.json({ success: true, data: mapped });
   } catch {

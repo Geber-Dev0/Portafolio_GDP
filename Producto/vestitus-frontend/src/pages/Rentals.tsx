@@ -7,8 +7,8 @@ import { CalendarDays, User, Filter, XCircle } from 'lucide-react'
 const statuses = ['', 'active', 'completed', 'cancelled'] as const
 const statusLabels: Record<string, string> = { active: 'Activo', completed: 'Completado', cancelled: 'Cancelado' }
 
-function normalizeStatus(s: string): string {
-  return s === 'confirmed' ? 'active' : s
+function normalizeStatus(s: string): Rental['status'] {
+  return (s === 'confirmed' ? 'active' : s) as Rental['status']
 }
 
 export default function Rentals() {

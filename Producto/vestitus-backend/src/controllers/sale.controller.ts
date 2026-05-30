@@ -9,7 +9,7 @@ export const getSelfSales = async (req: Request, res: Response) => {
     const sales = await saleService.findSalesByClientId(client.id);
     const mapped = sales.map(s => ({
       ...s,
-      product: s.product ? { ...s.product, images: (s.product as any).product_images || [] } : s.product,
+      product: s.products ? { ...s.products, images: (s.products as any).product_images || [] } : s.products,
     }));
     res.json({ success: true, data: mapped });
   } catch {
@@ -22,7 +22,7 @@ export const getSales = async (_req: Request, res: Response) => {
     const sales = await saleService.findSales();
     const mapped = sales.map(s => ({
       ...s,
-      product: s.product ? { ...s.product, images: (s.product as any).product_images || [] } : s.product,
+      product: s.products ? { ...s.products, images: (s.products as any).product_images || [] } : s.products,
     }));
     res.json({ success: true, data: mapped });
   } catch {
@@ -36,7 +36,7 @@ export const getSaleById = async (req: Request, res: Response) => {
     const sale = await saleService.findSaleById(id);
     const mapped = {
       ...sale,
-      product: sale.product ? { ...sale.product, images: (sale.product as any).product_images || [] } : sale.product,
+      product: sale.products ? { ...sale.products, images: (sale.products as any).product_images || [] } : sale.products,
     };
     res.json({ success: true, data: mapped });
   } catch {
