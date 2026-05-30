@@ -21,14 +21,12 @@ export default function Profile() {
   useEffect(() => {
     const load = async () => {
       try {
-        if (clientId) {
-          const [clientData, allSales] = await Promise.all([
-            clientService.getById(clientId),
-            salesService.getSelf(),
-          ])
-          setClient(clientData)
-          setSales(allSales.filter(s => s.client_id === clientId))
-        }
+        const [clientData, allSales] = await Promise.all([
+          clientService.getSelf(),
+          salesService.getSelf(),
+        ])
+        setClient(clientData)
+        setSales(allSales)
       } catch {} finally {
         setLoading(false)
       }
