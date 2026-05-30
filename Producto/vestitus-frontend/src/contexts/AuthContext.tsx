@@ -25,15 +25,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const findClientId = useCallback(async (role?: string) => {
     if (localStorage.getItem(CLIENT_ID_KEY)) return
+    const email = user?.email
+    if (!email) return
     try {
+      let foundId: string | null = null
       if (role === 'admin' || role === 'employee') {
         const clients = await clientService.getAll()
-        const match = clients.find(c => c.email === user?.email)
-        if (match) saveClientId(match.id)
+        const match = clients.find(c => c.email === email)
+        if (match) foundId = match.id
       } else {
         const client = await clientService.getSelf()
-        if (client?.id) saveClientId(client.id)
+        if (client?.id) foundId = client.id
       }
+      if (foundId) { saveClientId(foundId); return }
+      // No client record exists — create one automatically
+      const name = email.split('@')[0]
+      const created = await clientService.create({ name, email, client_type: 'natural' })
+      if (created?.id) saveClientId(created.id)
     } catch {}
   }, [saveClientId, user?.email])
 
