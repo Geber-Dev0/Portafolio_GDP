@@ -121,7 +121,7 @@ export default function Profile() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-[var(--text)]">{sale.product?.name || 'Producto'}</p>
-                    <p className="text-xs text-[var(--muted)]">{new Date(sale.created_at).toLocaleDateString()}</p>
+                    <p className="text-xs text-[var(--muted)]">{new Date(sale.created_at).toLocaleString('es-CL')}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium text-[var(--text)]">${(sale.sale_price * (sale.quantity || 1)).toLocaleString('es-CL')}</p>

@@ -61,7 +61,7 @@ export const createSale = async (payload: SalePayload) => {
       sale_price: payload.sale_price,
       quantity,
       payment_method: payload.payment_method,
-      payment_status: payload.payment_status || 'pending',
+      payment_status: payload.payment_status || 'paid',
       shipping_cost: payload.shipping_cost || 0,
       status: payload.status || 'completed'
     })
