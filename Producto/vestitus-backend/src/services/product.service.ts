@@ -159,7 +159,8 @@ export const checkAvailabilityByDateRange = async (productId: string, startDate:
     .select('id, start_date, end_date, status')
     .eq('product_id', productId)
     .in('status', ['active', 'confirmed', 'pending'])
-    .or(`start_date.lte.${endDate},end_date.gte.${startDate}`);
+    .lte('start_date', endDate)
+    .gte('end_date', startDate);
 
   if (rentalError) throw rentalError;
 
