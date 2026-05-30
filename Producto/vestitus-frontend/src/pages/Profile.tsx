@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/useAuth'
 import { clientService } from '../services/clients.service'
 import { salesService } from '../services/sales.service'
 import type { Client, Sale } from '../types'
-import { User, ShoppingBag, CalendarDays, Mail, Shield, FileText, Package } from 'lucide-react'
+import { User, ShoppingBag, CalendarDays, Mail, Shield, FileText } from 'lucide-react'
 
 const roleLabels: Record<string, string> = {
   admin: 'Administrador',
@@ -61,7 +61,7 @@ export default function Profile() {
         </div>
 
         {client && (
-          <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6">
+        <div id="compras" className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6">
             <h2 className="font-serif text-lg text-[var(--text)] mb-4">Datos de Facturación</h2>
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-3">
@@ -91,12 +91,12 @@ export default function Profile() {
               <p className="text-xs text-[var(--muted)]">Ver historial de arriendos</p>
             </div>
           </Link>
-          <Link to="/products"
+          <Link to="/profile#compras"
             className="flex items-center gap-2 bg-[var(--card)] rounded-2xl border border-[var(--border)] p-5 hover-lift transition-all flex-1">
-            <Package className="h-6 w-6 text-[var(--gold)]" />
+            <ShoppingBag className="h-6 w-6 text-[var(--gold)]" />
             <div>
-              <p className="text-sm font-medium text-[var(--text)]">Catálogo</p>
-              <p className="text-xs text-[var(--muted)]">Seguir comprando</p>
+              <p className="text-sm font-medium text-[var(--text)]">Mis Compras</p>
+              <p className="text-xs text-[var(--muted)]">Ver historial de compras</p>
             </div>
           </Link>
         </div>

@@ -20,6 +20,7 @@ export default function Checkout() {
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
   const [hasSales] = useState(() => items.some(i => i.type === 'sale'))
+  const [hasRentals] = useState(() => items.some(i => i.type === 'rent'))
 
   const handleConfirm = async () => {
     setProcessing(true)
@@ -131,12 +132,14 @@ export default function Checkout() {
             </Link>
             {hasSales && (
               <Link to="/profile" className="border border-[var(--border)] text-[var(--text)] px-8 py-3 rounded-full text-xs tracking-[0.1em] uppercase hover:bg-[var(--surface)] transition-colors">
-                Mi Perfil
+                Ir a Mis Compras
               </Link>
             )}
-            <Link to="/rentals" className="border border-[var(--border)] text-[var(--text)] px-8 py-3 rounded-full text-xs tracking-[0.1em] uppercase hover:bg-[var(--surface)] transition-colors">
-              Mis Arriendos
-            </Link>
+            {hasRentals && (
+              <Link to="/rentals" className="border border-[var(--border)] text-[var(--text)] px-8 py-3 rounded-full text-xs tracking-[0.1em] uppercase hover:bg-[var(--surface)] transition-colors">
+                Ir a Mis Arriendos
+              </Link>
+            )}
           </div>
         </div>
       </div>

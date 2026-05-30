@@ -84,6 +84,7 @@ export default function Navbar() {
             {user && (
               <>
                 <Link to="/profile" className="text-sm tracking-wide text-[var(--text)] hover:text-[var(--gold)] transition-colors">Perfil</Link>
+                <Link to="/profile" className="text-sm tracking-wide text-[var(--text)] hover:text-[var(--gold)] transition-colors">Mis Compras</Link>
                 <Link to="/rentals" className="text-sm tracking-wide text-[var(--text)] hover:text-[var(--gold)] transition-colors">Mis Arriendos</Link>
               </>
             )}
