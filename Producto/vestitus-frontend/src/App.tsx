@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { CartProvider } from './contexts/CartContext'
+import { ToastProvider } from './contexts/ToastContext'
 import { ProtectedRoute, AdminRoute } from './components/ui/ProtectedRoute'
 import MainLayout from './layouts/MainLayout'
 import Home from './pages/Home'
@@ -21,7 +22,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <CartProvider>
+        <ToastProvider>
+          <CartProvider>
           <Routes>
             <Route element={<MainLayout />}>
               <Route path="/" element={<Home />} />
@@ -39,7 +41,8 @@ export default function App() {
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
-        </CartProvider>
+          </CartProvider>
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   )
