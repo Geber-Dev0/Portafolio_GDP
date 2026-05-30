@@ -10,7 +10,7 @@ export const cancelSelfRental = async (req: Request, res: Response) => {
     const { id } = req.params;
     const rental = await rentalService.findRentalById(id);
     if (rental.client_id !== client.id) return res.status(403).json({ success: false, message: 'No tienes permiso para cancelar este arriendo' });
-    if (rental.status !== 'active') return res.status(400).json({ success: false, message: 'Solo se pueden cancelar arriendos activos' });
+    if (rental.status !== 'active' && rental.status !== 'confirmed') return res.status(400).json({ success: false, message: 'Solo se pueden cancelar arriendos activos' });
     await rentalService.updateRental(id, { status: 'cancelled' });
     await productService.adjustStock(rental.product_id, 1);
     res.json({ success: true, message: 'Arriendo cancelado correctamente' });

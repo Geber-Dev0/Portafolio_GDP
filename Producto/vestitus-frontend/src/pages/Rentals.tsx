@@ -7,6 +7,10 @@ import { CalendarDays, User, Filter, XCircle } from 'lucide-react'
 const statuses = ['', 'active', 'completed', 'cancelled'] as const
 const statusLabels: Record<string, string> = { active: 'Activo', completed: 'Completado', cancelled: 'Cancelado' }
 
+function normalizeStatus(s: string): string {
+  return s === 'confirmed' ? 'active' : s
+}
+
 export default function Rentals() {
   const { clientId, isEmployee } = useAuth()
   const [rentals, setRentals] = useState<Rental[]>([])
@@ -19,7 +23,7 @@ export default function Rentals() {
   const load = () => {
     const req = isEmployee ? rentalService.getAll() : rentalService.getSelf()
     req
-      .then(data => setRentals(data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())))
+      .then(data => setRentals(data.map(r => ({ ...r, status: normalizeStatus(r.status) })).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())))
       .catch((err) => setError(err?.response?.data?.message || 'Error al cargar arriendos'))
       .finally(() => setLoading(false))
   }
