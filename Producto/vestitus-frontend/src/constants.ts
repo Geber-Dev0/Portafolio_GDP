@@ -1,1 +1,1 @@
-export const SEASON_LABEL = 'AW 2026'
+export const SEASON_LABEL = ''
