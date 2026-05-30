@@ -54,7 +54,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
           <Link to="/" className="flex items-center gap-2">
-            <img src="/Vestitus.png" alt="Vestitus" className="h-9 w-auto drop-shadow-[0_0_6px_rgba(0,0,0,0.5)]" />
+            <img src="/Vestitus.png" alt="Vestitus" className="h-10 w-auto" />
             <span className="font-serif text-2xl tracking-tight text-[var(--text)]">Vestitus</span>
             <span className="hidden sm:inline text-xs tracking-[0.2em] uppercase text-[var(--muted)] ml-2">{SEASON_LABEL}</span>
           </Link>
