@@ -1,9 +1,26 @@
 import { Link } from 'react-router-dom'
 import { useCart } from '../contexts/CartContext'
-import { ShoppingBag, Trash2, ArrowLeft, Minus, Plus, AlertCircle } from 'lucide-react'
+import { ShoppingBag, Trash2, ArrowLeft, Minus, Plus, AlertCircle, Info } from 'lucide-react'
+
+function calcRentalPrice(price: number, start: string, end: string, period: string): number {
+  if (!start || !end) return price
+  const days = Math.max(1, Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24)))
+  if (period === 'days') return price
+  if (period === 'weeks') return price * Math.ceil(days / 7)
+  return price * Math.ceil(days / 30)
+}
+
+const today = () => new Date().toISOString().split('T')[0]
+
+function itemPrice(item: { product: { price: number }; type: string; quantity: number; startDate?: string; endDate?: string; periodType?: string }): number {
+  if (item.type === 'rent') {
+    return calcRentalPrice(item.product.price, item.startDate || '', item.endDate || '', item.periodType || 'days') * item.quantity
+  }
+  return item.product.price * item.quantity
+}
 
 export default function Cart() {
-  const { items, removeItem, updateItem, clearCart, total, itemCount } = useCart()
+  const { items, removeItem, updateItem, clearCart, itemCount } = useCart()
 
   if (items.length === 0) {
     return (
@@ -61,12 +78,12 @@ export default function Cart() {
                 <div className="flex flex-wrap items-center gap-4 mt-3">
                   <div>
                     <label className="text-xs text-[var(--muted)] block">Desde</label>
-                    <input type="date" value={item.startDate || ''} onChange={(e) => updateItem(item.id, { startDate: e.target.value })}
+                    <input type="date" min={today()} value={item.startDate || ''} onChange={(e) => updateItem(item.id, { startDate: e.target.value })}
                       className="bg-[var(--surface)] border border-[var(--border)] rounded-full px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)] mt-1" />
                   </div>
                   <div>
                     <label className="text-xs text-[var(--muted)] block">Hasta</label>
-                    <input type="date" value={item.endDate || ''} onChange={(e) => updateItem(item.id, { endDate: e.target.value })}
+                    <input type="date" min={item.startDate || today()} value={item.endDate || ''} onChange={(e) => updateItem(item.id, { endDate: e.target.value })}
                       className="bg-[var(--surface)] border border-[var(--border)] rounded-full px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)] mt-1" />
                   </div>
                   <div>
@@ -100,7 +117,10 @@ export default function Cart() {
               )}
             </div>
             <div className="text-right flex-shrink-0">
-              <p className="price text-lg font-medium text-[var(--text)]">${(item.product.price * item.quantity).toLocaleString('es-CL')}</p>
+              <p className="price text-lg font-medium text-[var(--text)]">${itemPrice(item).toLocaleString('es-CL')}</p>
+              {item.type === 'rent' && item.startDate && item.endDate && new Date(item.endDate) > new Date(item.startDate) && (
+                <p className="text-[10px] text-[var(--muted)] mt-0.5">precio estimado</p>
+              )}
               <button onClick={() => removeItem(item.id)} className="mt-2 text-xs text-[var(--muted)] hover:text-red-600 transition-colors">
                 <Trash2 className="h-4 w-4 inline" /> Eliminar
               </button>
@@ -110,9 +130,15 @@ export default function Cart() {
       </div>
 
       <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6">
+        {items.some(i => i.type === 'rent') && (
+          <div className="flex items-start gap-2 text-xs text-[var(--muted)] mb-4">
+            <Info className="h-3 w-3 flex-shrink-0 mt-0.5" />
+            <span>Los precios de arriendo son estimados según las fechas seleccionadas.</span>
+          </div>
+        )}
         <div className="flex items-center justify-between mb-6">
           <span className="text-sm text-[var(--muted)]">Subtotal</span>
-          <span className="price text-2xl font-medium text-[var(--text)]">${total.toLocaleString('es-CL')}</span>
+          <span className="price text-2xl font-medium text-[var(--text)]">${items.reduce((s, i) => s + itemPrice(i), 0).toLocaleString('es-CL')}</span>
         </div>
         {items.some(i => i.type === 'rent' && (!i.startDate || !i.endDate)) && (
           <div className="flex items-start gap-2 text-xs text-amber-700 bg-amber-50 p-3 rounded-xl mb-4">
@@ -120,10 +146,22 @@ export default function Cart() {
             <span>Hay prendas en arriendo sin fechas seleccionadas. Complétalas antes de pagar.</span>
           </div>
         )}
-        <Link to="/checkout"
-          className="block w-full bg-[var(--text)] text-white py-3 rounded-full text-sm tracking-[0.1em] uppercase text-center hover:bg-[var(--gold-dark)] transition-colors">
-          Ir a Pagar
-        </Link>
+        {items.some(i => i.type === 'rent' && i.startDate && i.endDate && new Date(i.endDate) <= new Date(i.startDate)) && (
+          <div className="flex items-start gap-2 text-xs text-red-700 bg-red-50 p-3 rounded-xl mb-4">
+            <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+            <span>Hay arriendos con fechas inválidas (la fecha de término debe ser posterior a la de inicio).</span>
+          </div>
+        )}
+        {(() => {
+          const hasInvalidDates = items.some(i => i.type === 'rent' && (!i.startDate || !i.endDate || new Date(i.endDate) <= new Date(i.startDate)))
+          return (
+            <Link to={hasInvalidDates ? '#' : '/checkout'}
+              onClick={(e) => { if (hasInvalidDates) e.preventDefault() }}
+              className={`block w-full text-white py-3 rounded-full text-sm tracking-[0.1em] uppercase text-center transition-colors ${hasInvalidDates ? 'bg-[var(--muted)] cursor-not-allowed' : 'bg-[var(--text)] hover:bg-[var(--gold-dark)]'}`}>
+              Ir a Pagar
+            </Link>
+          )
+        })()}
       </div>
     </div>
   )

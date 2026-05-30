@@ -12,6 +12,9 @@ CREATE TABLE IF NOT EXISTS products (
   stock_quantity integer NOT NULL DEFAULT 0,
   condition text,
   is_available boolean NOT NULL DEFAULT true,
+  size text,
+  color text,
+  collection text,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );

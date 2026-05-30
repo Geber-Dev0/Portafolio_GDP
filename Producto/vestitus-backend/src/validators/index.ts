@@ -25,7 +25,10 @@ export const productSchema = z.object({
   status: z.string().optional(),
   stock_quantity: z.number().int().min(0).optional(),
   condition: z.string().optional(),
-  is_available: z.boolean().optional()
+  is_available: z.boolean().optional(),
+  size: z.string().optional(),
+  color: z.string().optional(),
+  collection: z.string().optional()
 });
 
 export const clientSchema = z.object({

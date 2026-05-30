@@ -81,7 +81,10 @@ export default function Navbar() {
               )}
             </div>
             {user && (
-              <Link to="/rentals" className="text-sm tracking-wide text-[var(--text)] hover:text-[var(--gold)] transition-colors">Mis Arriendos</Link>
+              <>
+                <Link to="/profile" className="text-sm tracking-wide text-[var(--text)] hover:text-[var(--gold)] transition-colors">Perfil</Link>
+                <Link to="/rentals" className="text-sm tracking-wide text-[var(--text)] hover:text-[var(--gold)] transition-colors">Mis Arriendos</Link>
+              </>
             )}
             {isEmployee && (
               <Link to="/admin" className="text-sm tracking-wide text-[var(--text)] hover:text-[var(--gold)] transition-colors">Admin</Link>
@@ -141,6 +144,7 @@ export default function Navbar() {
               </div>
             )}
           </div>
+          {user && <Link to="/profile" className="block text-sm tracking-wide py-1" onClick={() => setMobileOpen(false)}>Perfil</Link>}
           {user && <Link to="/rentals" className="block text-sm tracking-wide py-1" onClick={() => setMobileOpen(false)}>Mis Arriendos</Link>}
           {isEmployee && <Link to="/admin" className="block text-sm tracking-wide py-1" onClick={() => setMobileOpen(false)}>Admin</Link>}
           <Link to="/corporate-info" className="block text-sm tracking-wide py-1" onClick={() => setMobileOpen(false)}>Nosotros</Link>
@@ -152,6 +156,16 @@ export default function Navbar() {
               <div className="border-t border-[var(--border)] pt-3 mt-3" />
               <Link to="/login" className="block text-sm tracking-wide py-1" onClick={() => setMobileOpen(false)}>Ingresar</Link>
               <Link to="/register" className="block text-sm tracking-wide py-1" onClick={() => setMobileOpen(false)}>Registrarse</Link>
+            </>
+          )}
+          {user && (
+            <>
+              <div className="border-t border-[var(--border)] pt-3 mt-3" />
+              <span className="block text-xs text-[var(--muted)] py-1">{user.email}</span>
+              <button onClick={() => { setMobileOpen(false); handleLogout() }}
+                className="block text-sm tracking-wide py-1 text-[var(--muted)] hover:text-red-600 transition-colors">
+                Salir
+              </button>
             </>
           )}
         </div>

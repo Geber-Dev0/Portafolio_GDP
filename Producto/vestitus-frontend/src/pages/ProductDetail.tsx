@@ -4,8 +4,10 @@ import { productService } from '../services/products.service'
 import { useCart } from '../contexts/CartContext'
 import type { Product } from '../types'
 import { useAuth } from '../contexts/useAuth'
-import { Calendar, ChevronLeft, ChevronRight, ArrowLeft, ShoppingBag } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, ArrowLeft, ShoppingBag, AlertCircle } from 'lucide-react'
 import { SEASON_LABEL } from '../constants'
+
+const today = () => new Date().toISOString().split('T')[0]
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>()
@@ -18,7 +20,11 @@ export default function ProductDetail() {
   const [endDate, setEndDate] = useState('')
   const [periodType, setPeriodType] = useState<'days' | 'weeks' | 'months'>('days')
   const [added, setAdded] = useState(false)
+  const [addingSale, setAddingSale] = useState(false)
+  const [addingRent, setAddingRent] = useState(false)
   const [addedSale, setAddedSale] = useState(false)
+  const [dateError, setDateError] = useState('')
+  const [saleError, setSaleError] = useState('')
 
   useEffect(() => {
     if (id) {
@@ -26,23 +32,41 @@ export default function ProductDetail() {
     }
   }, [id])
 
-  const handleAddRentToCart = (e: React.FormEvent) => {
+  const handleAddRentToCart = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!product) return
+    if (!startDate || !endDate) { setDateError('Selecciona fecha de inicio y término'); return }
+    if (new Date(endDate) <= new Date(startDate)) { setDateError('La fecha de término debe ser posterior a la de inicio'); return }
+    setDateError('')
+    setAddingRent(true)
+    await new Promise(r => setTimeout(r, 300))
     addItem(product, 'rent', { startDate, endDate, periodType })
+    setAddingRent(false)
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
   }
 
-  const handleAddSaleToCart = () => {
+  const handleAddSaleToCart = async () => {
     if (!product) return
+    if ((product.stock ?? 0) < 1) { setSaleError('Producto sin stock disponible'); return }
+    setSaleError('')
+    setAddingSale(true)
+    await new Promise(r => setTimeout(r, 300))
     addItem(product, 'sale')
+    setAddingSale(false)
     setAddedSale(true)
     setTimeout(() => setAddedSale(false), 2000)
   }
 
   if (loading) return <div className="flex justify-center py-32"><div className="animate-spin h-6 w-6 border-2 border-[var(--gold)] border-t-transparent rounded-full" /></div>
-  if (!product) return <div className="text-center py-32 text-[var(--muted)]">Producto no encontrado</div>
+  if (!product) return (
+    <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+      <Link to="/products" className="inline-flex items-center gap-2 text-xs tracking-[0.1em] uppercase text-[var(--muted)] hover:text-[var(--text)] transition-colors mb-8">
+        <ArrowLeft className="h-3 w-3" /> Volver al Catálogo
+      </Link>
+      <div className="text-center py-20 text-[var(--muted)]">Producto no encontrado</div>
+    </div>
+  )
 
   return (
     <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
@@ -134,11 +158,14 @@ export default function ProductDetail() {
           {user ? (
             <div className="space-y-4">
               {(product.type === 'sale' || product.type === 'both') && (
-                <button onClick={handleAddSaleToCart}
-                  className="w-full bg-[var(--text)] text-white py-3 rounded-full text-sm tracking-[0.1em] uppercase hover:bg-[var(--gold-dark)] transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-                  <ShoppingBag className="h-4 w-4" />
-                  {addedSale ? '✓ Agregado al Carrito' : 'Agregar al Carrito'}
-                </button>
+                <div>
+                  <button onClick={handleAddSaleToCart} disabled={addingSale || addedSale || (product.stock ?? 0) < 1}
+                    className="w-full bg-[var(--text)] text-white py-3 rounded-full text-sm tracking-[0.1em] uppercase hover:bg-[var(--gold-dark)] transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                    <ShoppingBag className="h-4 w-4" />
+                    {(product.stock ?? 0) < 1 ? 'Sin stock' : addingSale ? 'Agregando...' : addedSale ? '✓ Agregado' : 'Comprar'}
+                  </button>
+                  {saleError && <p className="flex items-center gap-1 text-red-600 text-xs mt-2"><AlertCircle className="h-3 w-3" /> {saleError}</p>}
+                </div>
               )}
 
               {(product.type === 'rent' || product.type === 'both') && (
@@ -149,12 +176,12 @@ export default function ProductDetail() {
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Desde</label>
-                      <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required
+                      <input type="date" min={today()} value={startDate} onChange={(e) => { setStartDate(e.target.value); setDateError('') }} required
                         className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)]" />
                     </div>
                     <div>
                       <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Hasta</label>
-                      <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required
+                      <input type="date" min={startDate || today()} value={endDate} onChange={(e) => { setEndDate(e.target.value); setDateError('') }} required
                         className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)]" />
                     </div>
                   </div>
@@ -167,10 +194,11 @@ export default function ProductDetail() {
                       <option value="months">Meses</option>
                     </select>
                   </div>
-                  <button type="submit" disabled={added}
+                  <button type="submit" disabled={addingRent || added}
                     className="w-full bg-[var(--text)] text-white py-3 rounded-full text-sm tracking-[0.1em] uppercase hover:bg-[var(--gold-dark)] transition-colors disabled:opacity-50">
-                    {added ? '✓ Agregado al Carrito' : 'Agregar al Carrito'}
+                    {addingRent ? 'Agregando...' : added ? '✓ Agendado' : 'Arrendar'}
                   </button>
+                  {dateError && <p className="flex items-center gap-1 text-red-600 text-xs mt-2"><AlertCircle className="h-3 w-3" /> {dateError}</p>}
                 </form>
               )}
             </div>

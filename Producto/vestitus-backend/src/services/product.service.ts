@@ -10,6 +10,9 @@ export interface ProductPayload {
   stock_quantity?: number;
   condition?: string;
   is_available?: boolean;
+  size?: string;
+  color?: string;
+  collection?: string;
 }
 
 export interface ProductFilters {

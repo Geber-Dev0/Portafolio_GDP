@@ -28,6 +28,16 @@ export const findClientById = async (id: string) => {
   return data;
 };
 
+export const findClientByEmail = async (email: string) => {
+  const { data, error } = await supabase
+    .from('clients')
+    .select('*')
+    .eq('email', email)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+};
+
 export const createClient = async (payload: ClientPayload) => {
   const { data, error } = await supabase
     .from('clients')

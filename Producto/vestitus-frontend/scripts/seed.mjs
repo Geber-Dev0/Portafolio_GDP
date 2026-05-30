@@ -14,13 +14,13 @@ const products = [
   { name: 'Blazer + Pantalón Camel', description: 'Conjunto de blazer y pantalón recto en tono camel.', category: 'trajes', type: 'sale', price: 72000, stock: 2, size: 'M', color: 'Camel', img: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80' },
   { name: 'Smoking Clásico', description: 'Smoking negro con solapa de raso.', category: 'trajes', type: 'rent', price: 58000, stock: 2, size: 'XL', color: 'Negro', img: 'https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=800&q=80' },
   { name: 'Chaqueta Denim + Jeans', description: 'Chaqueta denim con jeans de corte recto.', category: 'casual', type: 'sale', price: 35000, stock: 6, size: 'M', color: 'Azul', img: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80' },
-  { name: 'Sweater Oversize Beige', description: 'Sweater tejido oversize en tono beige.', category: 'casual', type: 'both', price: 28000, stock: 8, size: 'L', color: 'Beige', img: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800&q=80' },
-  { name: 'Parka Invierno Verde Oliva', description: 'Parka acolchada con capucha.', category: 'casual', type: 'sale', price: 42000, stock: 4, size: 'M', color: 'Verde Oliva', img: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800&q=80' },
-  { name: 'Vestido Largo Gala Dorado', description: 'Vestido largo dorado con lentejuelas.', category: 'formal', type: 'rent', price: 68000, stock: 1, size: 'S', color: 'Dorado', img: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=800&q=80' },
-  { name: 'Traje Noche Azul Medianoche', description: 'Traje de noche azul marino completo.', category: 'formal', type: 'rent', price: 60000, stock: 2, size: 'L', color: 'Azul Marino', img: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=800&q=80' },
-  { name: 'Abrigo Largo Lana', description: 'Abrigo clásico de lana hasta la rodilla.', category: 'formal', type: 'both', price: 52000, stock: 3, size: 'M', color: 'Gris', img: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80' },
-  { name: 'Chaleco Acolchado', description: 'Chaleco acolchado reversible.', category: 'casual', type: 'sale', price: 25000, stock: 7, size: 'L', color: 'Negro', img: 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=800&q=80' },
-  { name: 'Sweater Cuello Alto Cashmere', description: 'Sweater de cashmere cuello alto.', category: 'casual', type: 'both', price: 38000, stock: 5, size: 'M', color: 'Crema', img: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800&q=80' },
+  { name: 'Sweater Oversize Beige', description: 'Sweater tejido oversize en tono beige.', category: 'casual', type: 'both', price: 28000, stock: 8, size: 'L', color: 'Beige', collection: 'invierno', img: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800&q=80' },
+  { name: 'Parka Invierno Verde Oliva', description: 'Parka acolchada con capucha.', category: 'casual', type: 'sale', price: 42000, stock: 4, size: 'M', color: 'Verde Oliva', collection: 'invierno', img: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800&q=80' },
+  { name: 'Vestido Largo Gala Dorado', description: 'Vestido largo dorado con lentejuelas.', category: 'formal', type: 'rent', price: 68000, stock: 1, size: 'S', color: 'Dorado', collection: 'invierno', img: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=800&q=80' },
+  { name: 'Traje Noche Azul Medianoche', description: 'Traje de noche azul marino completo.', category: 'formal', type: 'rent', price: 60000, stock: 2, size: 'L', color: 'Azul Marino', img: 'https://images.unsplash.com/photo-1612336307429-8a898d10e223?w=800&q=80' },
+  { name: 'Abrigo Largo Lana', description: 'Abrigo clásico de lana hasta la rodilla.', category: 'formal', type: 'both', price: 52000, stock: 3, size: 'M', color: 'Gris', collection: 'invierno', img: 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=800&q=80' },
+  { name: 'Chaleco Acolchado', description: 'Chaleco acolchado reversible.', category: 'casual', type: 'sale', price: 25000, stock: 7, size: 'L', color: 'Negro', collection: 'invierno', img: 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=800&q=80' },
+  { name: 'Sweater Cuello Alto Cashmere', description: 'Sweater de cashmere cuello alto.', category: 'casual', type: 'both', price: 38000, stock: 5, size: 'M', color: 'Crema', collection: 'invierno', img: 'https://images.unsplash.com/photo-1490914327627-9fe8d52f4d90?w=800&q=80' },
 ]
 
 const tmpDir = join(__dirname, '..', 'tmp')
@@ -60,7 +60,7 @@ async function deleteProduct(token, id) {
 async function createProduct(token, p) {
   const res = await api('POST', '/products', token, {
     name: p.name, description: p.description, category: p.category,
-    type: p.type, price: p.price, stock: p.stock, size: p.size, color: p.color,
+    type: p.type, price: p.price, stock_quantity: p.stock, size: p.size, color: p.color, collection: p.collection,
   })
   if (!res.ok) {
     const text = await res.text()

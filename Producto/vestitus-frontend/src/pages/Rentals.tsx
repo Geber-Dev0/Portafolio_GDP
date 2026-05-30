@@ -1,40 +1,45 @@
 import { useState, useEffect } from 'react'
 import { rentalService } from '../services/rentals.service'
-import { clientService } from '../services/clients.service'
 import { useAuth } from '../contexts/useAuth'
 import type { Rental } from '../types'
-import { CalendarDays, User, Filter } from 'lucide-react'
+import { CalendarDays, User, Filter, XCircle } from 'lucide-react'
 
 const statuses = ['', 'active', 'completed', 'cancelled'] as const
 const statusLabels: Record<string, string> = { active: 'Activo', completed: 'Completado', cancelled: 'Cancelado' }
 
 export default function Rentals() {
-  const { user } = useAuth()
+  const { clientId } = useAuth()
   const [rentals, setRentals] = useState<Rental[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [showMineOnly, setShowMineOnly] = useState(false)
-  const [myClientId, setMyClientId] = useState<string | null>(null)
+  const [cancelling, setCancelling] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!user) return
-    clientService.getAll().then(clients => {
-      const match = clients.find(c => c.email === user.email)
-      if (match) setMyClientId(match.id)
-    }).catch(() => {})
-  }, [user])
-
-  useEffect(() => {
+  const load = () => {
     rentalService.getAll()
-      .then(setRentals)
+      .then(data => setRentals(data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())))
       .catch((err) => setError(err?.response?.data?.message || 'Error al cargar arriendos'))
       .finally(() => setLoading(false))
-  }, [])
+  }
+
+  useEffect(() => { load() }, [])
+
+  const handleCancel = async (id: string) => {
+    setCancelling(id)
+    try {
+      await rentalService.update(id, { status: 'cancelled' })
+      load()
+    } catch {
+      setError('Error al cancelar el arriendo')
+    } finally {
+      setCancelling(null)
+    }
+  }
 
   const filtered = rentals.filter(r => {
     if (statusFilter && r.status !== statusFilter) return false
-    if (showMineOnly && myClientId && r.client_id !== myClientId) return false
+    if (showMineOnly && clientId && r.client_id !== clientId) return false
     return true
   })
 
@@ -68,7 +73,7 @@ export default function Rentals() {
             ))}
           </select>
         </div>
-        {myClientId && (
+        {clientId && (
           <button onClick={() => setShowMineOnly(!showMineOnly)}
             className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs tracking-[0.1em] uppercase border transition-colors ${showMineOnly ? 'bg-[var(--gold)]/20 text-[var(--gold-dark)] border-[var(--gold)]' : 'border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)]'}`}>
             <User className="h-3 w-3" /> Solo míos
@@ -100,6 +105,12 @@ export default function Rentals() {
                   <span className={`badge ${rental.status === 'active' ? 'bg-green-100 text-green-800' : rental.status === 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>
                     {statusLabels[rental.status] || rental.status}
                   </span>
+                  {rental.status === 'active' && (
+                    <button onClick={() => handleCancel(rental.id)} disabled={cancelling === rental.id}
+                      className="block ml-auto mt-2 text-[10px] tracking-[0.1em] uppercase text-red-600 hover:text-red-800 transition-colors disabled:opacity-50 flex items-center gap-1">
+                      <XCircle className="h-3 w-3" /> {cancelling === rental.id ? 'Cancelando…' : 'Cancelar'}
+                    </button>
+                  )}
                   <p className="price text-lg font-medium text-[var(--text)] mt-2">${rental.rental_price?.toLocaleString('es-CL')}</p>
                 </div>
               </div>
