@@ -16,6 +16,7 @@ export interface Product {
   is_available: boolean
   size?: string
   color?: string
+  collection?: string
   images: ProductImage[]
   created_at: string
 }
@@ -66,6 +67,7 @@ export interface Sale {
   client_id: string
   product_id: string
   sale_price: number
+  quantity?: number
   payment_status: 'pending' | 'paid' | 'cancelled'
   client?: Client
   product?: Product

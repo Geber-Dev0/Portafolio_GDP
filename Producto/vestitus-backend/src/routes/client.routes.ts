@@ -39,6 +39,7 @@ const router = Router();
  *         description: Cliente creado
  */
 router.get('/', authenticate, authorize('admin', 'employee'), clientController.getClients);
+router.get('/self', authenticate, clientController.getSelfClient);
 router.get('/:id', authenticate, authorize('admin', 'employee'), clientController.getClientById);
 router.post('/', authenticate, validate(clientSchema), clientController.createClient);
 router.put('/:id', authenticate, authorize('admin', 'employee'), clientController.updateClient);

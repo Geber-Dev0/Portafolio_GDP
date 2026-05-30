@@ -21,4 +21,8 @@ export const salesService = {
     const { data } = await api.put(`/sales/${id}`, sale)
     return data.data
   },
+
+  async delete(id: string): Promise<void> {
+    await api.delete(`/sales/${id}`)
+  },
 }

@@ -1,23 +1,53 @@
-import { useState, useEffect, startTransition, type ReactNode } from 'react'
+import { useState, useEffect, startTransition, useCallback, type ReactNode } from 'react'
 import { authService } from '../services/auth.service'
+import { clientService } from '../services/clients.service'
 import type { User } from '../types'
 import { AuthContext } from './AuthContextValue'
 import type { AuthContextType } from './AuthContextType'
 
 export type { AuthContextType }
 
+const CLIENT_ID_KEY = 'vestitus_client_id'
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const savedToken = localStorage.getItem('token')
+  const savedClientId = localStorage.getItem(CLIENT_ID_KEY)
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(savedToken)
   const [loading, setLoading] = useState(() => !!savedToken)
+  const [clientId, setClientId] = useState<string | null>(savedClientId)
+
+  const saveClientId = useCallback((id: string | null) => {
+    setClientId(id)
+    if (id) localStorage.setItem(CLIENT_ID_KEY, id)
+    else localStorage.removeItem(CLIENT_ID_KEY)
+  }, [])
+
+  const findClientId = useCallback(async (role?: string) => {
+    if (localStorage.getItem(CLIENT_ID_KEY)) return
+    try {
+      if (role === 'admin' || role === 'employee') {
+        const clients = await clientService.getAll()
+        const match = clients.find(c => c.email === user?.email)
+        if (match) saveClientId(match.id)
+      } else {
+        const client = await clientService.getSelf()
+        if (client?.id) saveClientId(client.id)
+      }
+    } catch {}
+  }, [saveClientId, user?.email])
 
   useEffect(() => {
     if (!token) return
     let cancelled = false
     startTransition(() => {
       authService.me()
-        .then((res) => { if (!cancelled) setUser(res) })
+        .then((res) => {
+          if (!cancelled) {
+            setUser(res)
+            findClientId(res.role)
+          }
+        })
         .catch(() => {
           if (!cancelled) {
             localStorage.removeItem('token')
@@ -28,18 +58,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .finally(() => { if (!cancelled) setLoading(false) })
     })
     return () => { cancelled = true }
-  }, [token])
+  }, [token, findClientId])
 
   const login = async (email: string, password: string) => {
     const res = await authService.login(email, password)
     localStorage.setItem('token', res.token)
     setToken(res.token)
     setUser(res.user)
+    findClientId(res.user.role)
     return res.user
   }
 
   const register = async (email: string, password: string) => {
     await authService.register(email, password)
+    const name = email.split('@')[0]
+    const client = await clientService.create({ name, email, client_type: 'natural' })
+    if (client?.id) saveClientId(client.id)
   }
 
   const logout = async () => {
@@ -47,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await authService.logout()
     } finally {
       localStorage.removeItem('token')
+      localStorage.removeItem(CLIENT_ID_KEY)
       setToken(null)
       setUser(null)
     }
@@ -57,6 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         token,
+        clientId,
         loading,
         login,
         register,

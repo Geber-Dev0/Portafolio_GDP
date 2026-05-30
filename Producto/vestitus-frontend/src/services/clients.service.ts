@@ -7,6 +7,11 @@ export const clientService = {
     return data.data
   },
 
+  async getSelf(): Promise<Client> {
+    const { data } = await api.get('/clients/self')
+    return data.data
+  },
+
   async getById(id: string): Promise<Client> {
     const { data } = await api.get(`/clients/${id}`)
     return data.data

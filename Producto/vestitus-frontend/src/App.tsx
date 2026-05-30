@@ -11,6 +11,7 @@ import ProductDetail from './pages/ProductDetail'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import Rentals from './pages/Rentals'
+import Profile from './pages/Profile'
 import AdminDashboard from './pages/AdminDashboard'
 import CorporateInfo from './pages/CorporateInfo'
 import NotFound from './pages/NotFound'
@@ -31,6 +32,7 @@ export default function App() {
               <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
               <Route path="/corporate-info" element={<CorporateInfo />} />
               <Route path="/rentals" element={<ProtectedRoute><Rentals /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="*" element={<NotFound />} />
             </Route>

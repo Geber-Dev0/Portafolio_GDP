@@ -8,6 +8,7 @@ export default function Register() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const { register } = useAuth()
   const navigate = useNavigate()
 
@@ -29,24 +30,24 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (submitting) return
     setError('')
     if (password !== confirmPassword) {
       setError('Las contraseñas no coinciden')
       return
     }
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres')
-      return
-    }
+    setSubmitting(true)
     try {
       await register(email, password)
-      navigate('/login')
+      navigate('/login?registered=true')
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         setError(err.response?.data?.message || 'Error al registrarse')
       } else {
         setError('Error al registrarse')
       }
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -86,9 +87,9 @@ export default function Register() {
               <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required
                 className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)]" />
             </div>
-            <button type="submit"
-              className="w-full bg-[var(--text)] text-[var(--card)] py-3 rounded-full text-sm tracking-[0.1em] uppercase hover:bg-[var(--gold-dark)] transition-colors btn-gold">
-              Registrarse
+            <button type="submit" disabled={submitting}
+              className="w-full bg-[var(--text)] text-[var(--card)] py-3 rounded-full text-sm tracking-[0.1em] uppercase hover:bg-[var(--gold-dark)] transition-colors btn-gold disabled:opacity-50">
+              {submitting ? 'Registrando…' : 'Registrarse'}
             </button>
           </form>
 
