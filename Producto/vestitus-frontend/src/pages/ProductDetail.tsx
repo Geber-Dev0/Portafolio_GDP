@@ -109,9 +109,9 @@ export default function ProductDetail() {
           )}
         </div>
 
-        <div className="flex flex-col">
+        <div className="flex flex-col text-center">
           <span className="season-label text-[var(--gold)]"></span>
-          <span className={`mt-3 inline-block self-start badge ${product.type === 'rent' ? 'bg-[var(--gold)]/20 text-[var(--gold-dark)]' : 'bg-[var(--text)] text-white'}`}>
+          <span className={`mt-3 inline-block self-center badge ${product.type === 'rent' ? 'bg-[var(--gold)]/20 text-[var(--gold-dark)]' : 'bg-[var(--text)] text-white'}`}>
             {product.type === 'rent' ? 'Arriendo' : product.type === 'sale' ? 'Venta' : 'Arriendo y Venta'}
           </span>
 
@@ -122,24 +122,24 @@ export default function ProductDetail() {
 
           <div className="border-t border-[var(--border)] my-8" />
 
-          <div className="space-y-3 text-sm">
+          <div className="space-y-3 text-sm mx-auto">
             {product.size && (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center gap-3">
                 <span className="text-[var(--muted)] text-xs tracking-[0.1em] uppercase w-16">Talla</span>
                 <span className="text-[var(--text)]">{product.size}</span>
               </div>
             )}
             {product.color && (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center gap-3">
                 <span className="text-[var(--muted)] text-xs tracking-[0.1em] uppercase w-16">Color</span>
                 <span className="text-[var(--text)]">{product.color}</span>
               </div>
             )}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center gap-3">
               <span className="text-[var(--muted)] text-xs tracking-[0.1em] uppercase w-16">Stock</span>
               <span className="text-[var(--text)]">{product.stock} unidades</span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center gap-3">
               <span className="text-[var(--muted)] text-xs tracking-[0.1em] uppercase w-16">Estado</span>
               <span className={`text-xs tracking-wide ${product.is_available ? 'text-green-700' : 'text-red-600'}`}>
                 {product.is_available ? 'Disponible' : 'No disponible'}
@@ -150,7 +150,7 @@ export default function ProductDetail() {
           {product.description && (
             <>
               <div className="border-t border-[var(--border)] my-8" />
-              <p className="text-sm text-[var(--muted)] leading-relaxed">{product.description}</p>
+              <p className="text-sm text-[var(--muted)] leading-relaxed text-center">{product.description}</p>
             </>
           )}
 
@@ -171,7 +171,7 @@ export default function ProductDetail() {
 
               {(product.type === 'rent' || product.type === 'both') && (
                 <form onSubmit={handleAddRentToCart}>
-                  <h3 className="font-serif text-xl text-[var(--text)] mb-4 flex items-center gap-2">
+                  <h3 className="font-serif text-xl text-[var(--text)] mb-4 flex items-center justify-center gap-2">
                     <Calendar className="h-4 w-4 text-[var(--gold)]" /> Arriendo
                   </h3>
                   <div className="mb-4">
