@@ -5,17 +5,10 @@ import { useCart } from '../contexts/CartContext'
 import type { Product } from '../types'
 import { useAuth } from '../contexts/useAuth'
 import { Calendar, ChevronLeft, ChevronRight, ArrowLeft, ShoppingBag, AlertCircle, Minus, Plus } from 'lucide-react'
-import DatePicker from 'react-modern-calendar-datepicker'
-import 'react-modern-calendar-datepicker/lib/DatePicker.css'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
 
-const toDay = (d: string) => {
-  const dt = new Date(d)
-  return { year: dt.getFullYear(), month: dt.getMonth() + 1, day: dt.getDate() }
-}
-const fromDay = (d: { year: number; month: number; day: number }) =>
-  `${d.year}-${String(d.month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`
 const today = () => new Date().toISOString().split('T')[0]
-const todayDay = () => toDay(today())
 const addDays = (d: string, n: number) => { const dt = new Date(d); dt.setDate(dt.getDate() + n); return dt.toISOString().split('T')[0] }
 
 export default function ProductDetail() {
@@ -184,15 +177,14 @@ export default function ProductDetail() {
                   <div className="mb-4">
                     <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Fecha de inicio</label>
                     <DatePicker
-                      value={startDate ? toDay(startDate) : null}
-                      onChange={(d: any) => { if (d) { setStartDate(fromDay(d)); setDateError('') } }}
-                      minimumDate={todayDay()}
-                      inputPlaceholder="Seleccionar fecha"
-                      inputClassName="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm text-[var(--text)] hover:border-[var(--gold)] transition-colors outline-none focus:ring-2 focus:ring-[var(--gold)]"
+                      selected={startDate ? new Date(startDate) : null}
+                      onChange={(d: Date | null) => { if (d) { setStartDate(d.toISOString().split('T')[0]); setDateError('') } }}
+                      minDate={new Date()}
+                      dateFormat="dd 'de' MMMM, yyyy"
+                      placeholderText="Seleccionar fecha"
+                      className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm text-[var(--text)] hover:border-[var(--gold)] transition-colors outline-none focus:ring-2 focus:ring-[var(--gold)]"
                       calendarClassName="modern-calendar"
-                      colorPrimary="#b8860b"
-                      colorPrimaryLight="#f5e6c8"
-                      shouldHighlightWeekends
+                      shouldCloseOnSelect
                     />
                   </div>
                   <div className="mb-4">
