@@ -177,14 +177,15 @@ export default function ProductDetail() {
                   <div className="mb-4">
                     <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Fecha de inicio</label>
                     <div className="relative">
-                      <input ref={dateInputRef} type="date" min={today()} value={startDate}
-                        onChange={(e) => { setStartDate(e.target.value); setDateError('') }}
-                        className="absolute inset-0 opacity-0 cursor-pointer w-full" required />
-                      <div onClick={() => dateInputRef.current?.showPicker()}
-                        className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm cursor-pointer text-[var(--text)] flex items-center gap-2 hover:border-[var(--gold)] transition-colors">
-                        <Calendar className="h-4 w-4 text-[var(--gold)]" />
-                        {startDate ? new Date(startDate).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Seleccionar fecha'}
-                      </div>
+                      <label className="block cursor-pointer">
+                        <input ref={dateInputRef} type="date" min={today()} value={startDate}
+                          onChange={(e) => { setStartDate(e.target.value); setDateError('') }}
+                          className="absolute inset-0 opacity-0 w-full" required />
+                        <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm cursor-pointer text-[var(--text)] flex items-center gap-2 hover:border-[var(--gold)] transition-colors pointer-events-none">
+                          <Calendar className="h-4 w-4 text-[var(--gold)]" />
+                          {startDate ? new Date(startDate).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Seleccionar fecha'}
+                        </div>
+                      </label>
                     </div>
                   </div>
                   <div className="mb-4">
