@@ -1,5 +1,21 @@
 import { Request, Response } from 'express';
 import * as rentalService from '@services/rental.service';
+import * as clientService from '@services/client.service';
+
+export const getSelfRentals = async (req: Request, res: Response) => {
+  try {
+    const client = await clientService.findClientByEmail(req.user!.email);
+    if (!client) return res.status(404).json({ success: false, message: 'Cliente no encontrado' });
+    const rentals = await rentalService.findRentalsByClientId(client.id);
+    const mapped = rentals.map(r => ({
+      ...r,
+      product: r.product ? { ...r.product, images: (r.product as any).product_images || [] } : r.product,
+    }));
+    res.json({ success: true, data: mapped });
+  } catch {
+    res.status(500).json({ success: false, message: 'Error al obtener arriendos' });
+  }
+};
 
 export const getRentals = async (_req: Request, res: Response) => {
   try {

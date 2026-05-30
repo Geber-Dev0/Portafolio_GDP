@@ -40,6 +40,7 @@ const router = Router();
  *       201:
  *         description: Arriendo creado
  */
+router.get('/self', authenticate, rentalController.getSelfRentals);
 router.get('/', authenticate, authorize('admin', 'employee'), rentalController.getRentals);
 router.get('/:id', authenticate, authorize('admin', 'employee'), rentalController.getRentalById);
 router.post('/', authenticate, validate(rentalSchema), rentalController.createRental);

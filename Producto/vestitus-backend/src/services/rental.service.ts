@@ -40,6 +40,16 @@ export const findRentals = async () => {
   return data;
 };
 
+export const findRentalsByClientId = async (clientId: string) => {
+  const { data, error } = await supabase
+    .from('rentals')
+    .select('*, clients(*), products(*, product_images(*))')
+    .eq('client_id', clientId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+};
+
 export const findRentalById = async (id: string) => {
   const { data, error } = await supabase
     .from('rentals')

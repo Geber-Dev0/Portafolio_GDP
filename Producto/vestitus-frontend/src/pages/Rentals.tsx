@@ -8,7 +8,7 @@ const statuses = ['', 'active', 'completed', 'cancelled'] as const
 const statusLabels: Record<string, string> = { active: 'Activo', completed: 'Completado', cancelled: 'Cancelado' }
 
 export default function Rentals() {
-  const { clientId } = useAuth()
+  const { clientId, isEmployee } = useAuth()
   const [rentals, setRentals] = useState<Rental[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -17,7 +17,8 @@ export default function Rentals() {
   const [cancelling, setCancelling] = useState<string | null>(null)
 
   const load = () => {
-    rentalService.getAll()
+    const req = isEmployee ? rentalService.getAll() : rentalService.getSelf()
+    req
       .then(data => setRentals(data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())))
       .catch((err) => setError(err?.response?.data?.message || 'Error al cargar arriendos'))
       .finally(() => setLoading(false))

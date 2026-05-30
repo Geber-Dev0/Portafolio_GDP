@@ -31,12 +31,14 @@ const router = Router();
  *               client_id: { type: string, format: uuid }
  *               product_id: { type: string, format: uuid }
  *               sale_price: { type: number }
+ *               quantity: { type: integer }
  *               payment_method: { type: string }
  *               shipping_cost: { type: number }
  *     responses:
  *       201:
  *         description: Venta registrada
  */
+router.get('/self', authenticate, saleController.getSelfSales);
 router.get('/', authenticate, authorize('admin', 'employee'), saleController.getSales);
 router.get('/:id', authenticate, authorize('admin', 'employee'), saleController.getSaleById);
 router.post('/', authenticate, validate(saleSchema), saleController.createSale);

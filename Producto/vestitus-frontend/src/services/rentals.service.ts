@@ -7,6 +7,11 @@ export const rentalService = {
     return data.data
   },
 
+  async getSelf(): Promise<Rental[]> {
+    const { data } = await api.get('/rentals/self')
+    return data.data
+  },
+
   async getById(id: string): Promise<Rental> {
     const { data } = await api.get(`/rentals/${id}`)
     return data.data

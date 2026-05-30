@@ -7,6 +7,11 @@ export const salesService = {
     return data.data
   },
 
+  async getSelf(): Promise<Sale[]> {
+    const { data } = await api.get('/sales/self')
+    return data.data
+  },
+
   async getById(id: string): Promise<Sale> {
     const { data } = await api.get(`/sales/${id}`)
     return data.data

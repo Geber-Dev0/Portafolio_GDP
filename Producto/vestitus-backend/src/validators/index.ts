@@ -35,7 +35,7 @@ export const clientSchema = z.object({
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   phone: z.string().optional(),
   address: z.string().optional(),
-  client_type: z.enum(['natural', 'company', 'cultural']).optional(),
+  client_type: z.enum(['natural', 'empresa', 'agrupacion_cultural']).optional(),
   tax_document: z.string().optional()
 });
 
@@ -63,6 +63,7 @@ export const saleSchema = z.object({
   client_id: z.string().uuid('Cliente inválido'),
   product_id: z.string().uuid('Producto inválido'),
   sale_price: z.number().min(0, 'El precio no puede ser negativo'),
+  quantity: z.number().int().min(1, 'La cantidad debe ser al menos 1').optional(),
   payment_method: z.string().optional(),
   payment_status: z.string().optional(),
   shipping_cost: z.number().min(0).optional(),

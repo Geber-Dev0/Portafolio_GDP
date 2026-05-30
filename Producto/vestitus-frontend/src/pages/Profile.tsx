@@ -24,7 +24,7 @@ export default function Profile() {
         if (clientId) {
           const [clientData, allSales] = await Promise.all([
             clientService.getById(clientId),
-            salesService.getAll(),
+            salesService.getSelf(),
           ])
           setClient(clientData)
           setSales(allSales.filter(s => s.client_id === clientId))

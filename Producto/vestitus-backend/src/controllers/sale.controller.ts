@@ -1,5 +1,21 @@
 import { Request, Response } from 'express';
 import * as saleService from '@services/sale.service';
+import * as clientService from '@services/client.service';
+
+export const getSelfSales = async (req: Request, res: Response) => {
+  try {
+    const client = await clientService.findClientByEmail(req.user!.email);
+    if (!client) return res.status(404).json({ success: false, message: 'Cliente no encontrado' });
+    const sales = await saleService.findSalesByClientId(client.id);
+    const mapped = sales.map(s => ({
+      ...s,
+      product: s.product ? { ...s.product, images: (s.product as any).product_images || [] } : s.product,
+    }));
+    res.json({ success: true, data: mapped });
+  } catch {
+    res.status(500).json({ success: false, message: 'Error al obtener ventas' });
+  }
+};
 
 export const getSales = async (_req: Request, res: Response) => {
   try {
