@@ -286,7 +286,7 @@ export default function Products() {
                           </div>
                         )}
                         <div className="absolute top-3 left-3">
-                          <span className={`badge ${product.type === 'rent' ? 'bg-[var(--gold)]/20 text-[var(--gold-dark)]' : 'bg-[var(--text)]/10 text-[var(--text)]'}`}>
+                          <span className={`badge ${product.type === 'rent' ? 'bg-[var(--gold)]/20 text-[var(--gold-dark)]' : 'bg-[var(--text)] text-white'}`}>
                             {product.type === 'rent' ? 'Arriendo' : product.type === 'sale' ? 'Venta' : 'Dual'}
                           </span>
                         </div>
@@ -300,7 +300,7 @@ export default function Products() {
                           <div className="flex items-center justify-between">
                             <span className="font-sans text-lg font-medium text-[var(--text)] price">${product.price.toLocaleString('es-CL')}</span>
                           </div>
-                          {product.is_available && (
+                          {product.stock > 0 ? (
                             <div className="mt-2 flex gap-2">
                               {(product.type === 'sale' || product.type === 'both') && (
                                 <button onClick={(e) => handleAddToCart(e, product, 'sale')}
@@ -311,10 +311,16 @@ export default function Products() {
                               )}
                               {(product.type === 'rent' || product.type === 'both') && (
                                 <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/products/${product.id}`) }}
-                                  className="flex-1 text-xs tracking-[0.1em] uppercase border border-[var(--border)] text-[var(--text)] py-2 rounded-full hover:bg-[var(--surface)] transition-colors text-center">
+                                  className="flex-1 text-xs tracking-[0.1em] uppercase border border-[var(--gold-dark)] text-[var(--gold-dark)] py-2 rounded-full hover:bg-[var(--gold-dark)] hover:text-white transition-colors text-center">
                                   Arrendar
                                 </button>
                               )}
+                            </div>
+                          ) : (
+                            <div className="mt-2">
+                              <span className="block text-center text-xs tracking-[0.1em] uppercase text-red-600 font-medium py-2 rounded-full border border-red-200 bg-red-50">
+                                Sin existencias
+                              </span>
                             </div>
                           )}
                         </div>

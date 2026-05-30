@@ -110,7 +110,7 @@ export default function ProductDetail() {
 
         <div className="flex flex-col">
           <span className="season-label text-[var(--gold)]">{SEASON_LABEL}</span>
-          <span className={`mt-3 inline-block self-start badge ${product.type === 'rent' ? 'bg-[var(--gold)]/20 text-[var(--gold-dark)]' : product.type === 'sale' ? 'bg-[var(--text)]/10 text-[var(--text)]' : 'bg-[var(--text)]/10 text-[var(--text)]'}`}>
+          <span className={`mt-3 inline-block self-start badge ${product.type === 'rent' ? 'bg-[var(--gold)]/20 text-[var(--gold-dark)]' : 'bg-[var(--text)] text-white'}`}>
             {product.type === 'rent' ? 'Arriendo' : product.type === 'sale' ? 'Venta' : 'Arriendo y Venta'}
           </span>
 
