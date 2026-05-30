@@ -33,7 +33,22 @@ export const registerUser = async (email: string, password: string) => {
 
   if (error) throw new Error('Error al registrar usuario');
 
-  return data;
+  const payload: AuthPayload = {
+    userId: data.id,
+    email: data.email,
+    role: data.role
+  };
+
+  const token = jwt.sign(payload, config.jwtSecret, { expiresIn: '24h' });
+
+  return {
+    token,
+    user: {
+      id: data.id,
+      email: data.email,
+      role: data.role
+    }
+  };
 };
 
 export const authenticateUser = async (email: string, password: string) => {

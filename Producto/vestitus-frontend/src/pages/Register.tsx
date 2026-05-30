@@ -39,7 +39,7 @@ export default function Register() {
     setSubmitting(true)
     try {
       await register(email, password)
-      navigate('/login?registered=true')
+      navigate('/')
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         setError(err.response?.data?.message || 'Error al registrarse')

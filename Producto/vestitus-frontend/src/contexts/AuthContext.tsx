@@ -78,7 +78,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const register = async (email: string, password: string) => {
-    await authService.register(email, password)
+    const res = await authService.register(email, password)
+    localStorage.setItem('token', res.token)
+    setToken(res.token)
+    setUser(res.user)
     const name = email.split('@')[0]
     const client = await clientService.create({ name, email, client_type: 'natural' })
     if (client?.id) saveClientId(client.id)
