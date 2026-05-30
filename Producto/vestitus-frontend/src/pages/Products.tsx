@@ -291,13 +291,13 @@ export default function Products() {
                           </span>
                         </div>
                       </div>
-                      <div className="p-4 flex-1 flex flex-col justify-between">
+                      <div className="p-4 flex-1 flex flex-col justify-between text-center">
                         <div>
                           <h3 className="font-serif text-lg text-[var(--text)] group-hover:text-[var(--gold-dark)] transition-colors">{product.name}</h3>
                           <p className="text-xs text-[var(--muted)] mt-1 capitalize tracking-wide">{product.category}</p>
                         </div>
                         <div className="mt-3">
-                          <div className="flex items-center justify-between">
+                          <div className="flex justify-center">
                             <span className="font-sans text-lg font-medium text-[var(--text)] price">${product.price.toLocaleString('es-CL')}</span>
                           </div>
                           {product.stock > 0 ? (

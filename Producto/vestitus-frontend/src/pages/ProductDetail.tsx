@@ -16,7 +16,7 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [currentImage, setCurrentImage] = useState(0)
-  const [startDate, setStartDate] = useState('')
+  const [startDate, setStartDate] = useState(today())
   const [days, setDays] = useState(1)
   const [added, setAdded] = useState(false)
   const [addingSale, setAddingSale] = useState(false)
