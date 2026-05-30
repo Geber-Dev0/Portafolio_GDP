@@ -3,6 +3,7 @@ import { useCart } from '../contexts/CartContext'
 import { ShoppingBag, Trash2, ArrowLeft, Minus, Plus, AlertCircle, Info } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
+import { es } from 'date-fns/locale'
 
 const today = () => new Date().toISOString().split('T')[0]
 
@@ -82,6 +83,7 @@ export default function Cart() {
                     <label className="text-xs text-[var(--muted)] block">Inicio</label>
                     <div className="mt-1">
                       <DatePicker
+                        locale={es}
                         selected={item.startDate ? new Date(item.startDate) : null}
                         onChange={(d: Date | null) => {
                           if (d) {

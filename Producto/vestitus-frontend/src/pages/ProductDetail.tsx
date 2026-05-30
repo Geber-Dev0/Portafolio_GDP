@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/useAuth'
 import { Calendar, ChevronLeft, ChevronRight, ArrowLeft, ShoppingBag, AlertCircle, Minus, Plus } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
+import { es } from 'date-fns/locale'
 
 const today = () => new Date().toISOString().split('T')[0]
 const addDays = (d: string, n: number) => { const dt = new Date(d); dt.setDate(dt.getDate() + n); return dt.toISOString().split('T')[0] }
@@ -177,10 +178,11 @@ export default function ProductDetail() {
                   <div className="mb-4">
                     <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Fecha de inicio</label>
                     <DatePicker
+                      locale={es}
                       selected={startDate ? new Date(startDate) : null}
                       onChange={(d: Date | null) => { if (d) { setStartDate(d.toISOString().split('T')[0]); setDateError('') } }}
                       minDate={new Date()}
-                      dateFormat="dd 'de' MMMM, yyyy"
+                      dateFormat="d 'de' MMMM, yyyy"
                       placeholderText="Seleccionar fecha"
                       className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm text-[var(--text)] hover:border-[var(--gold)] transition-colors outline-none focus:ring-2 focus:ring-[var(--gold)]"
                       calendarClassName="modern-calendar"
@@ -189,7 +191,7 @@ export default function ProductDetail() {
                   </div>
                   <div className="mb-4">
                     <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Días</label>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-center gap-4">
                       <button type="button" onClick={() => setDays(Math.max(1, days - 1))}
                         className="w-10 h-10 border border-[var(--border)] rounded-full flex items-center justify-center hover:bg-[var(--surface)] transition-colors text-[var(--text)]">
                         <Minus className="h-4 w-4" />
