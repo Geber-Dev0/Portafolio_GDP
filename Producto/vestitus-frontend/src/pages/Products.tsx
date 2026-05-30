@@ -18,7 +18,7 @@ const PAGE_SIZE = 12
 const FALLBACK_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000"%3E%3Crect fill="%23E0D8CC" width="800" height="1000"/%3E%3Ctext fill="%238A8078" font-family="sans-serif" font-size="20" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3E%3C/text%3E%3C/svg%3E'
 const BANNER_IMG = 'https://images.unsplash.com/photo-1774544349354-6fbe1de7f0d3?w=1600&q=80'
 
-const INVIERNO_NAMES = new Set([
+const OTONO_INVIERNO_NAMES = new Set([
   'Chaleco Acolchado',
   'Abrigo Largo Lana',
   'Parka Invierno Verde Oliva',
@@ -66,8 +66,8 @@ export default function Products() {
   const filtered = allProducts.filter(p => {
     if (debouncedFilters.category && p.category !== debouncedFilters.category) return false
     if (debouncedFilters.type && p.type !== debouncedFilters.type) return false
-    if (debouncedFilters.collection === 'invierno') {
-      if (!INVIERNO_NAMES.has(p.name)) return false
+    if (debouncedFilters.collection === 'otono-invierno') {
+      if (!OTONO_INVIERNO_NAMES.has(p.name)) return false
     } else if (debouncedFilters.collection && p.collection !== debouncedFilters.collection) {
       return false
     }
@@ -113,7 +113,7 @@ export default function Products() {
           <p className="text-[var(--card)]/70 text-lg md:text-xl max-w-lg mt-4">
             Descubre nuestra colección Otoño/Invierno. Prendas exclusivas para arriendo y venta.
           </p>
-          <button onClick={() => navigate('/products?collection=invierno')}
+          <button onClick={() => navigate('/products?collection=otono-invierno')}
             className="mt-8 inline-flex items-center gap-2 bg-[var(--gold)] text-[var(--text)] px-8 py-3 rounded-full text-sm tracking-[0.1em] uppercase font-medium hover:bg-[var(--card)] transition-all">
             <Sparkles className="h-4 w-4" /> Explorar Colección
           </button>
@@ -176,7 +176,7 @@ export default function Products() {
             <div>
               <span className="season-label text-[var(--gold)]">Catálogo</span>
               <h2 className="font-serif text-3xl md:text-4xl text-[var(--text)] mt-2">
-                {filters.collection === 'invierno' ? 'Colección Invierno' : filters.category ? filters.category.charAt(0).toUpperCase() + filters.category.slice(1) : 'Todas las prendas'}
+                {filters.collection === 'otono-invierno' ? 'Colección Otoño/Invierno' : filters.category ? filters.category.charAt(0).toUpperCase() + filters.category.slice(1) : 'Todas las prendas'}
               </h2>
             </div>
             <button onClick={() => setShowFilters(!showFilters)}
@@ -227,10 +227,10 @@ export default function Products() {
 
           {activeFilterCount > 0 && (
             <div className="flex items-center gap-2 -mt-2 mb-10 flex-wrap">
-              {filters.collection === 'invierno' && (
+              {filters.collection === 'otono-invierno' && (
                 <button onClick={() => setFilters({ ...filters, collection: '' })}
                   className="badge bg-[var(--gold)]/20 text-[var(--gold-dark)] hover:bg-[var(--gold)]/30 transition-colors flex items-center gap-1">
-                  Colección: Invierno <X className="h-3 w-3" />
+                  Colección: Otoño/Invierno <X className="h-3 w-3" />
                 </button>
               )}
               {filters.category && (
