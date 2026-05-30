@@ -123,28 +123,28 @@ export default function ProductDetail() {
 
           <div className="border-t border-[var(--border)] my-8" />
 
-          <div className="space-y-3 text-sm mx-auto">
+          <div className="flex justify-center gap-8 text-center text-sm">
             {product.size && (
-              <div className="flex items-center justify-center gap-3">
-                <span className="text-[var(--muted)] text-xs tracking-[0.1em] uppercase w-16">Talla</span>
-                <span className="text-[var(--text)]">{product.size}</span>
+              <div>
+                <p className="text-[var(--muted)] text-[10px] tracking-[0.1em] uppercase">Talla</p>
+                <p className="text-[var(--text)] mt-0.5">{product.size}</p>
               </div>
             )}
             {product.color && (
-              <div className="flex items-center justify-center gap-3">
-                <span className="text-[var(--muted)] text-xs tracking-[0.1em] uppercase w-16">Color</span>
-                <span className="text-[var(--text)]">{product.color}</span>
+              <div>
+                <p className="text-[var(--muted)] text-[10px] tracking-[0.1em] uppercase">Color</p>
+                <p className="text-[var(--text)] mt-0.5">{product.color}</p>
               </div>
             )}
-            <div className="flex items-center justify-center gap-3">
-              <span className="text-[var(--muted)] text-xs tracking-[0.1em] uppercase w-16">Stock</span>
-              <span className="text-[var(--text)]">{product.stock} unidades</span>
+            <div>
+              <p className="text-[var(--muted)] text-[10px] tracking-[0.1em] uppercase">Stock</p>
+              <p className="text-[var(--text)] mt-0.5">{product.stock} uds.</p>
             </div>
-            <div className="flex items-center justify-center gap-3">
-              <span className="text-[var(--muted)] text-xs tracking-[0.1em] uppercase w-16">Estado</span>
-              <span className={`text-xs tracking-wide ${product.is_available ? 'text-green-700' : 'text-red-600'}`}>
+            <div>
+              <p className="text-[var(--muted)] text-[10px] tracking-[0.1em] uppercase">Estado</p>
+              <p className={`mt-0.5 text-xs ${product.is_available ? 'text-green-700' : 'text-red-600'}`}>
                 {product.is_available ? 'Disponible' : 'No disponible'}
-              </span>
+              </p>
             </div>
           </div>
 
