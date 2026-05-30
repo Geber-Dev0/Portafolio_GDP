@@ -31,18 +31,22 @@ export default function Products() {
   const { addItem } = useCart()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const initialCategory = searchParams.get('category') || ''
-  const initialCollection = searchParams.get('collection') || ''
   const [allProducts, setAllProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [filters, setFilters] = useState<ProductFilters>({ category: initialCategory, collection: initialCollection })
-  const [debouncedFilters, setDebouncedFilters] = useState<ProductFilters>({ category: initialCategory, collection: initialCollection })
+  const [filters, setFilters] = useState<ProductFilters>({ category: searchParams.get('category') || '', collection: searchParams.get('collection') || '' })
+  const [debouncedFilters, setDebouncedFilters] = useState<ProductFilters>({ category: searchParams.get('category') || '', collection: searchParams.get('collection') || '' })
   const [showFilters, setShowFilters] = useState(false)
   const [page, setPage] = useState(1)
   const [addedId, setAddedId] = useState<string | null>(null)
   const productsRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+
+  useEffect(() => {
+    const category = searchParams.get('category') || ''
+    const collection = searchParams.get('collection') || ''
+    setFilters(f => ({ ...f, category, collection }))
+  }, [searchParams])
 
   useEffect(() => {
     debounceRef.current = setTimeout(() => {
