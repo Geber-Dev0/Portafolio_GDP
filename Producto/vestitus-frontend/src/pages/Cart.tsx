@@ -1,8 +1,14 @@
 import { Link } from 'react-router-dom'
 import { useCart } from '../contexts/CartContext'
 import { ShoppingBag, Trash2, ArrowLeft, Minus, Plus, AlertCircle, Info } from 'lucide-react'
+import DatePicker from 'react-modern-calendar-datepicker'
+import 'react-modern-calendar-datepicker/lib/DatePicker.css'
 
 const today = () => new Date().toISOString().split('T')[0]
+const todayDay = () => { const d = new Date(); return { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() } }
+const toDay = (d: string) => { const dt = new Date(d); return { year: dt.getFullYear(), month: dt.getMonth() + 1, day: dt.getDate() } }
+const fromDay = (d: { year: number; month: number; day: number }) =>
+  `${d.year}-${String(d.month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`
 
 function calcRentalDays(start: string, end: string): number {
   if (!start || !end) return 1
@@ -78,14 +84,24 @@ export default function Cart() {
                 <div className="flex flex-wrap items-center gap-4 mt-3">
                   <div>
                     <label className="text-xs text-[var(--muted)] block">Inicio</label>
-                    <div className="relative mt-1">
-                      <input type="date" min={today()} value={item.startDate || ''}
-                        onChange={(e) => {
-                          const sd = e.target.value
-                          const ed = item.endDate && sd ? (new Date(item.endDate) <= new Date(sd) ? addDays(sd, calcRentalDays(sd, item.endDate)) : item.endDate) : ''
-                          updateItem(item.id, { startDate: sd, endDate: ed || addDays(sd, 1) })
+                    <div className="mt-1">
+                      <DatePicker
+                        value={item.startDate ? toDay(item.startDate) : null}
+                        onChange={(d: any) => {
+                          if (d) {
+                            const sd = fromDay(d)
+                            const ed = item.endDate && sd ? (new Date(item.endDate) <= new Date(sd) ? addDays(sd, calcRentalDays(sd, item.endDate)) : item.endDate) : ''
+                            updateItem(item.id, { startDate: sd, endDate: ed || addDays(sd, 1) })
+                          }
                         }}
-                        className="bg-[var(--surface)] border border-[var(--border)] rounded-full px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)] w-[140px]" />
+                        minimumDate={todayDay()}
+                        inputPlaceholder="Fecha"
+                        inputClassName="bg-[var(--surface)] border border-[var(--border)] rounded-full px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)] w-[140px]"
+                        calendarClassName="modern-calendar"
+                        colorPrimary="#b8860b"
+                        colorPrimaryLight="#f5e6c8"
+                        shouldHighlightWeekends
+                      />
                     </div>
                   </div>
                   <div>
