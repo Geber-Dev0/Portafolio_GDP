@@ -13,7 +13,7 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       { url: 'http://localhost:4000/api', description: 'Desarrollo' },
-      { url: 'https://portafolio-gdp.onrender.com/api', description: 'Producción' }
+      { url: 'https://vestitus-p0ma5xte8-gabrieleduardohg-8905s-projects.vercel.app/api', description: 'Producción' }
     ],
     components: {
       securitySchemes: {

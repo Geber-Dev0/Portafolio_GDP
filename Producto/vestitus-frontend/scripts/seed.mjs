@@ -3,7 +3,7 @@ import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const BASE = process.env.API_URL || 'https://portafolio-gdp.onrender.com/api'
+const BASE = process.env.API_URL || 'https://vestitus-p0ma5xte8-gabrieleduardohg-8905s-projects.vercel.app/api'
 
 const products = [
   { name: 'Vestido Noche Esmeralda', description: 'Elegante vestido largo color esmeralda con escote en V, ideal para galas.', category: 'vestidos', type: 'both', price: 45000, stock: 3, size: 'M', color: 'Verde Esmeralda', img: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&q=80' },
