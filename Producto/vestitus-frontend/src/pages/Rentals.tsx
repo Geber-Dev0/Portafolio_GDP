@@ -29,7 +29,11 @@ export default function Rentals() {
   const handleCancel = async (id: string) => {
     setCancelling(id)
     try {
-      await rentalService.update(id, { status: 'cancelled' })
+      if (isEmployee) {
+        await rentalService.update(id, { status: 'cancelled' })
+      } else {
+        await rentalService.cancelSelf(id)
+      }
       load()
     } catch {
       setError('Error al cancelar el arriendo')

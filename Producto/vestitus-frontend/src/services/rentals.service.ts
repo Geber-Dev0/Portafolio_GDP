@@ -27,6 +27,10 @@ export const rentalService = {
     return data.data
   },
 
+  async cancelSelf(id: string): Promise<void> {
+    await api.post(`/rentals/self/${id}/cancel`)
+  },
+
   async delete(id: string): Promise<void> {
     await api.delete(`/rentals/${id}`)
   },

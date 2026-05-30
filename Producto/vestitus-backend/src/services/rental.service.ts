@@ -91,7 +91,7 @@ export const createRental = async (payload: RentalPayload) => {
       rental_price: rentalPrice,
       appointment_date: payload.appointment_date,
       appointment_time: payload.appointment_time,
-      status: payload.status || 'confirmed'
+      status: payload.status || 'active'
     })
     .select()
     .single();

@@ -47,7 +47,7 @@ export const rentalSchema = z.object({
   period_type: z.enum(['days', 'weeks', 'months']),
   appointment_date: z.string().optional(),
   appointment_time: z.string().optional(),
-  status: z.string().optional()
+  status: z.enum(['active', 'completed', 'cancelled']).optional()
 });
 
 export const returnSchema = z.object({
