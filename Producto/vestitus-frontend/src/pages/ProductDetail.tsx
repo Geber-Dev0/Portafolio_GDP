@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { productService } from '../services/products.service'
 import { useCart } from '../contexts/CartContext'
 import type { Product } from '../types'
 import { useAuth } from '../contexts/useAuth'
-import { Calendar, ChevronLeft, ChevronRight, ArrowLeft, ShoppingBag, AlertCircle } from 'lucide-react'
-import { SEASON_LABEL } from '../constants'
+import { Calendar, ChevronLeft, ChevronRight, ArrowLeft, ShoppingBag, AlertCircle, Minus, Plus } from 'lucide-react'
 
 const today = () => new Date().toISOString().split('T')[0]
+const addDays = (d: string, n: number) => { const dt = new Date(d); dt.setDate(dt.getDate() + n); return dt.toISOString().split('T')[0] }
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>()
@@ -17,14 +17,14 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true)
   const [currentImage, setCurrentImage] = useState(0)
   const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
-  const [periodType, setPeriodType] = useState<'days' | 'weeks' | 'months'>('days')
+  const [days, setDays] = useState(1)
   const [added, setAdded] = useState(false)
   const [addingSale, setAddingSale] = useState(false)
   const [addingRent, setAddingRent] = useState(false)
   const [addedSale, setAddedSale] = useState(false)
   const [dateError, setDateError] = useState('')
   const [saleError, setSaleError] = useState('')
+  const dateInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (id) {
@@ -35,12 +35,13 @@ export default function ProductDetail() {
   const handleAddRentToCart = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!product) return
-    if (!startDate || !endDate) { setDateError('Selecciona fecha de inicio y término'); return }
-    if (new Date(endDate) <= new Date(startDate)) { setDateError('La fecha de término debe ser posterior a la de inicio'); return }
+    if (!startDate) { setDateError('Selecciona una fecha de inicio'); return }
+    if (days < 1 || days > 30) { setDateError('Los días deben ser entre 1 y 30'); return }
+    const endDate = addDays(startDate, days)
     setDateError('')
     setAddingRent(true)
     await new Promise(r => setTimeout(r, 300))
-    addItem(product, 'rent', { startDate, endDate, periodType })
+    addItem(product, 'rent', { startDate, endDate, periodType: 'days' })
     setAddingRent(false)
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
@@ -109,7 +110,7 @@ export default function ProductDetail() {
         </div>
 
         <div className="flex flex-col">
-          <span className="season-label text-[var(--gold)]">{SEASON_LABEL}</span>
+          <span className="season-label text-[var(--gold)]"></span>
           <span className={`mt-3 inline-block self-start badge ${product.type === 'rent' ? 'bg-[var(--gold)]/20 text-[var(--gold-dark)]' : 'bg-[var(--text)] text-white'}`}>
             {product.type === 'rent' ? 'Arriendo' : product.type === 'sale' ? 'Venta' : 'Arriendo y Venta'}
           </span>
@@ -173,30 +174,36 @@ export default function ProductDetail() {
                   <h3 className="font-serif text-xl text-[var(--text)] mb-4 flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-[var(--gold)]" /> Arriendo
                   </h3>
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Desde</label>
-                      <input type="date" min={today()} value={startDate} onChange={(e) => { setStartDate(e.target.value); setDateError('') }} required
-                        className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)]" />
-                    </div>
-                    <div>
-                      <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Hasta</label>
-                      <input type="date" min={startDate || today()} value={endDate} onChange={(e) => { setEndDate(e.target.value); setDateError('') }} required
-                        className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)]" />
+                  <div className="mb-4">
+                    <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Fecha de inicio</label>
+                    <div className="relative">
+                      <input ref={dateInputRef} type="date" min={today()} value={startDate}
+                        onChange={(e) => { setStartDate(e.target.value); setDateError('') }}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full" required />
+                      <div onClick={() => dateInputRef.current?.showPicker()}
+                        className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm cursor-pointer text-[var(--text)] flex items-center gap-2 hover:border-[var(--gold)] transition-colors">
+                        <Calendar className="h-4 w-4 text-[var(--gold)]" />
+                        {startDate ? new Date(startDate).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Seleccionar fecha'}
+                      </div>
                     </div>
                   </div>
                   <div className="mb-4">
-                    <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Período</label>
-                    <select value={periodType} onChange={(e) => setPeriodType(e.target.value as 'days' | 'weeks' | 'months')}
-                      className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)]">
-                      <option value="days">Días</option>
-                      <option value="weeks">Semanas</option>
-                      <option value="months">Meses</option>
-                    </select>
+                    <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Días</label>
+                    <div className="flex items-center gap-4">
+                      <button type="button" onClick={() => setDays(Math.max(1, days - 1))}
+                        className="w-10 h-10 border border-[var(--border)] rounded-full flex items-center justify-center hover:bg-[var(--surface)] transition-colors text-[var(--text)]">
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <span className="text-xl font-medium text-[var(--text)] w-8 text-center">{days}</span>
+                      <button type="button" onClick={() => setDays(Math.min(30, days + 1))}
+                        className="w-10 h-10 border border-[var(--border)] rounded-full flex items-center justify-center hover:bg-[var(--surface)] transition-colors text-[var(--text)]">
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                   <button type="submit" disabled={addingRent || added}
                     className="w-full bg-[var(--text)] text-white py-3 rounded-full text-sm tracking-[0.1em] uppercase hover:bg-[var(--gold-dark)] transition-colors disabled:opacity-50">
-                    {addingRent ? 'Agregando...' : added ? '✓ Agendado' : 'Arrendar'}
+                    {addingRent ? 'Agregando...' : added ? '✓ Agendado' : `Arrendar (${days} ${days === 1 ? 'día' : 'días'})`}
                   </button>
                   {dateError && <p className="flex items-center gap-1 text-red-600 text-xs mt-2"><AlertCircle className="h-3 w-3" /> {dateError}</p>}
                 </form>

@@ -2,19 +2,19 @@ import { Link } from 'react-router-dom'
 import { useCart } from '../contexts/CartContext'
 import { ShoppingBag, Trash2, ArrowLeft, Minus, Plus, AlertCircle, Info } from 'lucide-react'
 
-function calcRentalPrice(price: number, start: string, end: string, period: string): number {
-  if (!start || !end) return price
-  const days = Math.max(1, Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24)))
-  if (period === 'days') return price
-  if (period === 'weeks') return price * Math.ceil(days / 7)
-  return price * Math.ceil(days / 30)
-}
-
 const today = () => new Date().toISOString().split('T')[0]
 
-function itemPrice(item: { product: { price: number }; type: string; quantity: number; startDate?: string; endDate?: string; periodType?: string }): number {
+function calcRentalDays(start: string, end: string): number {
+  if (!start || !end) return 1
+  return Math.max(1, Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24)))
+}
+
+const addDays = (d: string, n: number) => { const dt = new Date(d); dt.setDate(dt.getDate() + n); return dt.toISOString().split('T')[0] }
+
+function itemPrice(item: { product: { price: number }; type: string; quantity: number; startDate?: string; endDate?: string }): number {
   if (item.type === 'rent') {
-    return calcRentalPrice(item.product.price, item.startDate || '', item.endDate || '', item.periodType || 'days') * item.quantity
+    const days = calcRentalDays(item.startDate || '', item.endDate || '')
+    return item.product.price * days * item.quantity
   }
   return item.product.price * item.quantity
 }
@@ -77,23 +77,44 @@ export default function Cart() {
               {item.type === 'rent' && (
                 <div className="flex flex-wrap items-center gap-4 mt-3">
                   <div>
-                    <label className="text-xs text-[var(--muted)] block">Desde</label>
-                    <input type="date" min={today()} value={item.startDate || ''} onChange={(e) => updateItem(item.id, { startDate: e.target.value })}
-                      className="bg-[var(--surface)] border border-[var(--border)] rounded-full px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)] mt-1" />
+                    <label className="text-xs text-[var(--muted)] block">Inicio</label>
+                    <div className="relative mt-1">
+                      <input type="date" min={today()} value={item.startDate || ''}
+                        onChange={(e) => {
+                          const sd = e.target.value
+                          const ed = item.endDate && sd ? (new Date(item.endDate) <= new Date(sd) ? addDays(sd, calcRentalDays(sd, item.endDate)) : item.endDate) : ''
+                          updateItem(item.id, { startDate: sd, endDate: ed || addDays(sd, 1) })
+                        }}
+                        className="bg-[var(--surface)] border border-[var(--border)] rounded-full px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)] w-[140px]" />
+                    </div>
                   </div>
                   <div>
-                    <label className="text-xs text-[var(--muted)] block">Hasta</label>
-                    <input type="date" min={item.startDate || today()} value={item.endDate || ''} onChange={(e) => updateItem(item.id, { endDate: e.target.value })}
-                      className="bg-[var(--surface)] border border-[var(--border)] rounded-full px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)] mt-1" />
-                  </div>
-                  <div>
-                    <label className="text-xs text-[var(--muted)] block">Período</label>
-                    <select value={item.periodType || 'days'} onChange={(e) => updateItem(item.id, { periodType: e.target.value as 'days' | 'weeks' | 'months' })}
-                      className="bg-[var(--surface)] border border-[var(--border)] rounded-full px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)] mt-1">
-                      <option value="days">Días</option>
-                      <option value="weeks">Semanas</option>
-                      <option value="months">Meses</option>
-                    </select>
+                    <label className="text-xs text-[var(--muted)] block">Días</label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <button type="button"
+                        onClick={() => {
+                          const sd = item.startDate || today()
+                          const cur = calcRentalDays(sd, item.endDate || '')
+                          const nd = Math.max(1, cur - 1)
+                          updateItem(item.id, { endDate: addDays(sd, nd) })
+                        }}
+                        className="w-7 h-7 border border-[var(--border)] rounded-full flex items-center justify-center hover:bg-[var(--surface)] transition-colors">
+                        <Minus className="h-3 w-3" />
+                      </button>
+                      <span className="text-sm text-[var(--text)] w-6 text-center font-medium">
+                        {item.startDate && item.endDate ? calcRentalDays(item.startDate, item.endDate) : '-'}
+                      </span>
+                      <button type="button"
+                        onClick={() => {
+                          const sd = item.startDate || today()
+                          const cur = calcRentalDays(sd, item.endDate || '')
+                          const nd = Math.min(30, cur + 1)
+                          updateItem(item.id, { endDate: addDays(sd, nd) })
+                        }}
+                        className="w-7 h-7 border border-[var(--border)] rounded-full flex items-center justify-center hover:bg-[var(--surface)] transition-colors">
+                        <Plus className="h-3 w-3" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

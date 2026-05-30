@@ -7,12 +7,9 @@ import { salesService } from '../services/sales.service'
 import { productService } from '../services/products.service'
 import { CheckCircle, AlertCircle, ArrowLeft, ShoppingBag, Info } from 'lucide-react'
 
-function calcRentalPrice(price: number, start: string, end: string, period: string): number {
-  if (!start || !end) return price
-  const days = Math.max(1, Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24)))
-  if (period === 'days') return price
-  if (period === 'weeks') return price * Math.ceil(days / 7)
-  return price * Math.ceil(days / 30)
+function calcRentalDays(start: string, end: string): number {
+  if (!start || !end) return 1
+  return Math.max(1, Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24)))
 }
 
 export default function Checkout() {
@@ -170,7 +167,7 @@ export default function Checkout() {
       <div className="space-y-4 mb-8">
         {items.map((item) => {
           const rentalTotal = item.type === 'rent' && item.startDate
-            ? calcRentalPrice(item.product.price, item.startDate, item.endDate || '', item.periodType || 'days') * item.quantity
+            ? item.product.price * calcRentalDays(item.startDate, item.endDate || '') * item.quantity
             : item.product.price * item.quantity
           return (
           <div key={item.id} className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-4 flex items-center gap-4">
@@ -208,7 +205,7 @@ export default function Checkout() {
           <span className="price text-2xl font-medium text-[var(--text)]">
             ${items.reduce((sum, item) => {
               if (item.type === 'rent' && item.startDate) {
-                return sum + calcRentalPrice(item.product.price, item.startDate, item.endDate || '', item.periodType || 'days') * item.quantity
+                return sum + item.product.price * calcRentalDays(item.startDate, item.endDate || '') * item.quantity
               }
               return sum + item.product.price * item.quantity
             }, 0).toLocaleString('es-CL')}
