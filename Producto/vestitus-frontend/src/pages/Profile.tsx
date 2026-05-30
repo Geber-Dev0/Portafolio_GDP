@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/useAuth'
 import { clientService } from '../services/clients.service'
-import { salesService } from '../services/sales.service'
-import type { Client, Sale } from '../types'
+import type { Client } from '../types'
 import { User, ShoppingBag, CalendarDays, Mail, Shield, FileText } from 'lucide-react'
 
 const roleLabels: Record<string, string> = {
@@ -13,26 +12,16 @@ const roleLabels: Record<string, string> = {
 }
 
 export default function Profile() {
-  const { user, clientId } = useAuth()
+  const { user } = useAuth()
   const [client, setClient] = useState<Client | null>(null)
-  const [sales, setSales] = useState<Sale[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const [clientData, allSales] = await Promise.all([
-          clientService.getSelf(),
-          salesService.getSelf(),
-        ])
-        setClient(clientData)
-        setSales(allSales)
-      } catch {} finally {
-        setLoading(false)
-      }
-    }
-    load()
-  }, [clientId])
+    clientService.getSelf()
+      .then(setClient)
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
 
   if (loading) return <div className="flex justify-center py-32"><div className="animate-spin h-6 w-6 border-2 border-[var(--gold)] border-t-transparent rounded-full" /></div>
 
@@ -61,7 +50,7 @@ export default function Profile() {
         </div>
 
         {client && (
-        <div id="compras" className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6">
+        <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6">
             <h2 className="font-serif text-lg text-[var(--text)] mb-4">Datos de Facturación</h2>
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-3">
@@ -91,7 +80,7 @@ export default function Profile() {
               <p className="text-xs text-[var(--muted)]">Ver historial de arriendos</p>
             </div>
           </Link>
-          <Link to="/profile#compras"
+          <Link to="/purchases"
             className="flex items-center gap-2 bg-[var(--card)] rounded-2xl border border-[var(--border)] p-5 hover-lift transition-all flex-1">
             <ShoppingBag className="h-6 w-6 text-[var(--gold)]" />
             <div>
@@ -99,41 +88,6 @@ export default function Profile() {
               <p className="text-xs text-[var(--muted)]">Ver historial de compras</p>
             </div>
           </Link>
-        </div>
-
-        <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6">
-          <h2 className="font-serif text-lg text-[var(--text)] mb-4 flex items-center gap-2">
-            <ShoppingBag className="h-5 w-5 text-[var(--gold)]" /> Mis Compras
-          </h2>
-          {sales.length === 0 ? (
-            <div className="text-center py-10">
-              <ShoppingBag className="h-10 w-10 text-[var(--muted)] mx-auto mb-4" />
-              <p className="text-sm text-[var(--muted)]">No tienes compras registradas.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {sales.map((sale) => (
-                <div key={sale.id} className="flex items-center gap-4 p-4 bg-[var(--bg)] rounded-xl">
-                  <div className="w-12 h-14 rounded-lg overflow-hidden bg-[var(--surface)] flex-shrink-0">
-                    {sale.product?.images?.[0] && (
-                      <img src={sale.product.images[0].url} alt="" className="w-full h-full object-cover" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[var(--text)]">{sale.product?.name || 'Producto'}</p>
-                    <p className="text-xs text-[var(--muted)]">{new Date(sale.created_at).toLocaleString('es-CL')}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-[var(--text)]">${(sale.sale_price * (sale.quantity || 1)).toLocaleString('es-CL')}</p>
-                    {sale.quantity && sale.quantity > 1 && <p className="text-[10px] text-[var(--muted)]">×{sale.quantity}</p>}
-                    <span className={`badge text-[10px] ${sale.payment_status === 'paid' ? 'bg-green-100 text-green-800' : sale.payment_status === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'}`}>
-                      {sale.payment_status === 'paid' ? 'Pagado' : sale.payment_status === 'cancelled' ? 'Cancelado' : 'Pendiente'}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>

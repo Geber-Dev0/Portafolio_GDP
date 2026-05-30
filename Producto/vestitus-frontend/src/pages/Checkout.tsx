@@ -131,7 +131,7 @@ export default function Checkout() {
               Seguir Comprando
             </Link>
             {hasSales && (
-              <Link to="/profile" className="border border-[var(--border)] text-[var(--text)] px-8 py-3 rounded-full text-xs tracking-[0.1em] uppercase hover:bg-[var(--surface)] transition-colors">
+              <Link to="/purchases" className="border border-[var(--border)] text-[var(--text)] px-8 py-3 rounded-full text-xs tracking-[0.1em] uppercase hover:bg-[var(--surface)] transition-colors">
                 Ir a Mis Compras
               </Link>
             )}
