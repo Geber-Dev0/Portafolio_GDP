@@ -11,6 +11,7 @@ import { es } from 'date-fns/locale'
 
 const today = () => new Date().toISOString().split('T')[0]
 const addDays = (d: string, n: number) => { const dt = new Date(d); dt.setDate(dt.getDate() + n); return dt.toISOString().split('T')[0] }
+const calcRentalDays = (start: string, end: string) => Math.max(1, Math.round((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24)))
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>()
@@ -20,6 +21,7 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true)
   const [currentImage, setCurrentImage] = useState(0)
   const [startDate, setStartDate] = useState(today())
+  const [endDate, setEndDate] = useState(addDays(today(), 1))
   const [days, setDays] = useState(1)
   const [added, setAdded] = useState(false)
   const [addingSale, setAddingSale] = useState(false)
@@ -37,8 +39,8 @@ export default function ProductDetail() {
     e.preventDefault()
     if (!product) return
     if (!startDate) { setDateError('Selecciona una fecha de inicio'); return }
-    if (days < 1 || days > 30) { setDateError('Los días deben ser entre 1 y 30'); return }
-    const endDate = addDays(startDate, days)
+    if (!endDate) { setDateError('Selecciona una fecha de término'); return }
+    if (new Date(endDate) <= new Date(startDate)) { setDateError('La fecha de término debe ser posterior a la de inicio'); return }
     setDateError('')
     setAddingRent(true)
     await new Promise(r => setTimeout(r, 300))
@@ -78,7 +80,7 @@ export default function ProductDetail() {
 
       <div className="grid md:grid-cols-2 gap-12">
         <div>
-          <div className="aspect-[3/4] bg-[var(--bg)] rounded-2xl overflow-hidden relative">
+          <div className="h-[550px] xl:h-[650px] bg-[var(--bg)] rounded-2xl overflow-hidden relative">
             {product.images?.[currentImage] ? (
               <img src={product.images[currentImage].url} alt={product.name} className="w-full h-full object-cover" />
             ) : (
@@ -110,7 +112,7 @@ export default function ProductDetail() {
           )}
         </div>
 
-        <div className="flex flex-col text-center">
+        <div className="flex flex-col text-center overflow-y-auto">
           <span className="season-label text-[var(--gold)]"></span>
           <span className={`mt-3 inline-block self-center badge ${product.type === 'rent' ? 'bg-[var(--gold)]/20 text-[var(--gold-dark)]' : 'bg-[var(--text)] text-white'}`}>
             {product.type === 'rent' ? 'Arriendo' : product.type === 'sale' ? 'Venta' : 'Arriendo y Venta'}
@@ -175,29 +177,52 @@ export default function ProductDetail() {
                   <h3 className="font-serif text-xl text-[var(--text)] mb-4 flex items-center justify-center gap-2">
                     <Calendar className="h-4 w-4 text-[var(--gold)]" /> Arriendo
                   </h3>
-                  <div className="mb-4">
-                    <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Fecha de inicio</label>
-                    <DatePicker
-                      locale={es}
-                      selected={startDate ? new Date(startDate) : null}
-                      onChange={(d: Date | null) => { if (d) { setStartDate(d.toISOString().split('T')[0]); setDateError('') } }}
-                      minDate={new Date()}
-                      dateFormat="d 'de' MMMM, yyyy"
-                      placeholderText="Seleccionar fecha"
-                      className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm text-[var(--text)] hover:border-[var(--gold)] transition-colors outline-none focus:ring-2 focus:ring-[var(--gold)]"
-                      calendarClassName="modern-calendar"
-                      shouldCloseOnSelect
-                    />
+                  <div className="flex gap-4 mb-4">
+                    <div className="flex-1">
+                      <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Fecha de inicio</label>
+                      <DatePicker
+                        locale={es}
+                        selected={startDate ? new Date(startDate) : null}
+                        onChange={(d: Date | null) => {
+                          if (d) {
+                            const sd = d.toISOString().split('T')[0]
+                            setStartDate(sd)
+                            setEndDate(addDays(sd, days))
+                            setDateError('')
+                          }
+                        }}
+                        minDate={new Date()}
+                        dateFormat="d 'de' MMMM, yyyy"
+                        placeholderText="Inicio"
+                        className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm text-[var(--text)] hover:border-[var(--gold)] transition-colors outline-none focus:ring-2 focus:ring-[var(--gold)]"
+                        calendarClassName="modern-calendar"
+                        shouldCloseOnSelect
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Fecha de término</label>
+                      <DatePicker
+                        locale={es}
+                        selected={endDate ? new Date(endDate) : null}
+                        onChange={(d: Date | null) => { if (d) { const ed = d.toISOString().split('T')[0]; setEndDate(ed); setDays(calcRentalDays(startDate, ed)); setDateError('') } }}
+                        minDate={new Date(addDays(startDate, 1))}
+                        dateFormat="d 'de' MMMM, yyyy"
+                        placeholderText="Término"
+                        className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm text-[var(--text)] hover:border-[var(--gold)] transition-colors outline-none focus:ring-2 focus:ring-[var(--gold)]"
+                        calendarClassName="modern-calendar"
+                        shouldCloseOnSelect
+                      />
+                    </div>
                   </div>
                   <div className="mb-4">
                     <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Días</label>
                     <div className="flex items-center justify-center gap-4">
-                      <button type="button" onClick={() => setDays(Math.max(1, days - 1))}
+                      <button type="button" onClick={() => { const nd = Math.max(1, days - 1); setDays(nd); setEndDate(addDays(startDate, nd)) }}
                         className="w-10 h-10 border border-[var(--border)] rounded-full flex items-center justify-center hover:bg-[var(--surface)] transition-colors text-[var(--text)]">
                         <Minus className="h-4 w-4" />
                       </button>
                       <span className="text-xl font-medium text-[var(--text)] w-8 text-center">{days}</span>
-                      <button type="button" onClick={() => setDays(Math.min(30, days + 1))}
+                      <button type="button" onClick={() => { const nd = Math.min(30, days + 1); setDays(nd); setEndDate(addDays(startDate, nd)) }}
                         className="w-10 h-10 border border-[var(--border)] rounded-full flex items-center justify-center hover:bg-[var(--surface)] transition-colors text-[var(--text)]">
                         <Plus className="h-4 w-4" />
                       </button>

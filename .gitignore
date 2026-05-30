@@ -8,7 +8,4 @@ dist/
 npm-debug.log
 
 # Internal docs (not for public repo)
-context.md
-specs.md
-agents.md
-front.md
+*.md

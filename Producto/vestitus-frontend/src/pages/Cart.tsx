@@ -78,7 +78,7 @@ export default function Cart() {
               <p className="text-xs text-[var(--muted)] mt-1 capitalize">{item.product.category}</p>
 
               {item.type === 'rent' && (
-                <div className="flex flex-wrap items-center gap-4 mt-3">
+                <div className="flex flex-wrap items-end gap-4 mt-3">
                   <div>
                     <label className="text-xs text-[var(--muted)] block">Inicio</label>
                     <div className="mt-1">
@@ -88,12 +88,12 @@ export default function Cart() {
                         onChange={(d: Date | null) => {
                           if (d) {
                             const sd = d.toISOString().split('T')[0]
-                            const ed = item.endDate && sd ? (new Date(item.endDate) <= new Date(sd) ? addDays(sd, calcRentalDays(sd, item.endDate)) : item.endDate) : ''
-                            updateItem(item.id, { startDate: sd, endDate: ed || addDays(sd, 1) })
+                            const curDays = item.startDate && item.endDate ? calcRentalDays(item.startDate, item.endDate) : 1
+                            updateItem(item.id, { startDate: sd, endDate: addDays(sd, curDays) })
                           }
                         }}
                         minDate={new Date()}
-                        placeholderText="Fecha"
+                        placeholderText="Inicio"
                         className="bg-[var(--surface)] border border-[var(--border)] rounded-full px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)] w-[140px]"
                         calendarClassName="modern-calendar"
                         shouldCloseOnSelect
@@ -101,31 +101,18 @@ export default function Cart() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs text-[var(--muted)] block">Días</label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <button type="button"
-                        onClick={() => {
-                          const sd = item.startDate || today()
-                          const cur = calcRentalDays(sd, item.endDate || '')
-                          const nd = Math.max(1, cur - 1)
-                          updateItem(item.id, { endDate: addDays(sd, nd) })
-                        }}
-                        className="w-7 h-7 border border-[var(--border)] rounded-full flex items-center justify-center hover:bg-[var(--surface)] transition-colors">
-                        <Minus className="h-3 w-3" />
-                      </button>
-                      <span className="text-sm text-[var(--text)] w-6 text-center font-medium">
-                        {item.startDate && item.endDate ? calcRentalDays(item.startDate, item.endDate) : '-'}
-                      </span>
-                      <button type="button"
-                        onClick={() => {
-                          const sd = item.startDate || today()
-                          const cur = calcRentalDays(sd, item.endDate || '')
-                          const nd = Math.min(30, cur + 1)
-                          updateItem(item.id, { endDate: addDays(sd, nd) })
-                        }}
-                        className="w-7 h-7 border border-[var(--border)] rounded-full flex items-center justify-center hover:bg-[var(--surface)] transition-colors">
-                        <Plus className="h-3 w-3" />
-                      </button>
+                    <label className="text-xs text-[var(--muted)] block">Término</label>
+                    <div className="mt-1">
+                      <DatePicker
+                        locale={es}
+                        selected={item.endDate ? new Date(item.endDate) : null}
+                        onChange={(d: Date | null) => { if (d) { updateItem(item.id, { endDate: d.toISOString().split('T')[0] }) } }}
+                        minDate={item.startDate ? new Date(addDays(item.startDate, 1)) : new Date(addDays(today(), 1))}
+                        placeholderText="Término"
+                        className="bg-[var(--surface)] border border-[var(--border)] rounded-full px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)] w-[140px]"
+                        calendarClassName="modern-calendar"
+                        shouldCloseOnSelect
+                      />
                     </div>
                   </div>
                 </div>
