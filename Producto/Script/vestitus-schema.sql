@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS sales (
   client_id uuid REFERENCES clients(id) ON DELETE CASCADE,
   product_id uuid REFERENCES products(id) ON DELETE CASCADE,
   sale_price numeric(12,2) NOT NULL DEFAULT 0,
+  quantity integer NOT NULL DEFAULT 1,
   payment_method text,
   payment_status text,
   shipping_cost numeric(12,2) NOT NULL DEFAULT 0,
@@ -380,3 +381,19 @@ INSERT INTO corporate_info (mission, vision, objectives, address, phone, email) 
     'contacto@vestitus.cl'
   )
 ON CONFLICT DO NOTHING;
+
+-- ─── Migraciones para bases existentes ───
+
+ALTER TABLE sales ADD COLUMN IF NOT EXISTS quantity integer NOT NULL DEFAULT 1;
+
+CREATE OR REPLACE FUNCTION public.decrement_stock(p_product_id uuid, p_quantity integer DEFAULT 1)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  UPDATE products
+  SET stock_quantity = stock_quantity - p_quantity
+  WHERE id = p_product_id;
+END;
+$$;
