@@ -59,12 +59,3 @@ Portafolio/
 | Repositorio | https://github.com/Geber-Dev0/Portafolio_GDP.git |
 | API (producción) | `https://vestitus-api.vercel.app/api` |
 | Frontend | `https://vestitus-frontend.onrender.com` |
-
-## Documentación técnica
-
-| Documento | Ubicación |
-|-----------|-----------|
-| Informe diseño solución | `Producto/vestitus-backend/doc/INFORME_DISENO_SOLUCION.md` |
-| Plan de pruebas (44 casos) | `Producto/vestitus-backend/doc/PLAN_DE_PRUEBAS.md` |
-| Esquema BD completo | `Producto/Script/vestitus-schema.sql` |
-| BD de pruebas | `Producto/Script/test-database-setup.sql` |

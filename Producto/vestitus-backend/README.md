@@ -109,14 +109,6 @@ npm run test:watch  # modo watch
 
 Los tests cubren: autenticación, CRUD productos, arriendos, ventas, middleware, validadores.
 
-## Documentación
-
-| Documento | Ubicación |
-|-----------|-----------|
-| Informe diseño solución | `doc/INFORME_DISENO_SOLUCION.md` |
-| Plan de pruebas | `doc/PLAN_DE_PRUEBAS.md` |
-| Informe pruebas EP3 | `doc/INFORME_PRUEBAS_EP3.doc` |
-
 ## Deploy en Vercel
 
 1. Crear repo en GitHub y pushear
