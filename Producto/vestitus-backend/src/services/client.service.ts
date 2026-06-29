@@ -1,12 +1,18 @@
 import supabase from '../database';
 
 export interface ClientPayload {
-  name: string;
+  name?: string;
   email?: string;
   phone?: string;
   address?: string;
   client_type?: string;
   tax_document?: string;
+  first_name?: string;
+  last_name?: string;
+  gender?: string;
+  birth_date?: string;
+  region?: string;
+  commune?: string;
 }
 
 export const findClients = async () => {
@@ -28,10 +34,26 @@ export const findClientById = async (id: string) => {
   return data;
 };
 
-export const createClient = async (payload: ClientPayload) => {
+export const findClientByEmail = async (email: string) => {
   const { data, error } = await supabase
     .from('clients')
-    .insert(payload)
+    .select('*')
+    .eq('email', email)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+};
+
+export const createClient = async (payload: ClientPayload) => {
+  const insertPayload: Record<string, unknown> = { ...payload };
+
+  if (payload.first_name && payload.last_name && !payload.name) {
+    insertPayload.name = `${payload.first_name} ${payload.last_name}`;
+  }
+
+  const { data, error } = await supabase
+    .from('clients')
+    .insert(insertPayload)
     .select()
     .single();
   if (error) throw error;

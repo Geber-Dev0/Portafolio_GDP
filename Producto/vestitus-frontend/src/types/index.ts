@@ -16,6 +16,7 @@ export interface Product {
   is_available: boolean
   size?: string
   color?: string
+  collection?: string
   images: ProductImage[]
   created_at: string
 }
@@ -32,8 +33,15 @@ export interface Client {
   name: string
   email: string
   phone: string
+  address?: string
   client_type: 'natural' | 'empresa' | 'agrupacion_cultural'
   tax_document?: string
+  first_name?: string
+  last_name?: string
+  gender?: string
+  birth_date?: string
+  region?: string
+  commune?: string
   created_at: string
 }
 
@@ -66,6 +74,7 @@ export interface Sale {
   client_id: string
   product_id: string
   sale_price: number
+  quantity?: number
   payment_status: 'pending' | 'paid' | 'cancelled'
   client?: Client
   product?: Product

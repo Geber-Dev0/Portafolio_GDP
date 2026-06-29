@@ -142,9 +142,9 @@ export default function Home() {
             </div>
             <div className="relative">
               <span className="font-serif text-6xl text-[var(--gold)]/20 absolute -top-8 left-0">03</span>
-              <h3 className="font-serif text-2xl text-[var(--text)] mt-4 mb-3">Despacho Rápido</h3>
+              <h3 className="font-serif text-2xl text-[var(--text)] mt-4 mb-3">Entrega Ágil</h3>
               <p className="text-sm text-[var(--muted)] leading-relaxed">
-                Envío a todo Chile con couriers asociados. Tu look, donde lo necesites.
+                Coordinamos la entrega de tus prendas para que las disfrutes sin complicaciones.
               </p>
             </div>
           </div>

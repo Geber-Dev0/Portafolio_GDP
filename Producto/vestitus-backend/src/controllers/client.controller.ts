@@ -1,6 +1,16 @@
 import { Request, Response } from 'express';
 import * as clientService from '@services/client.service';
 
+export const getSelfClient = async (req: Request, res: Response) => {
+  try {
+    const client = await clientService.findClientByEmail(req.user!.email);
+    if (!client) return res.status(404).json({ success: false, message: 'Cliente no encontrado' });
+    res.json({ success: true, data: client });
+  } catch {
+    res.status(500).json({ success: false, message: 'Error al obtener cliente' });
+  }
+};
+
 export const getClients = async (_req: Request, res: Response) => {
   try {
     const clients = await clientService.findClients();

@@ -12,6 +12,7 @@ export interface ProductPayload {
   is_available?: boolean;
   size?: string;
   color?: string;
+  collection?: string;
 }
 
 export interface ProductFilters {

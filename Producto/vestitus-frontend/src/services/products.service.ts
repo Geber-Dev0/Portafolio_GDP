@@ -5,31 +5,44 @@ export interface ProductFilters {
   category?: string
   type?: string
   available?: string
+  collection?: string
+}
+
+const TYPE_MAP: Record<string, string> = {
+  rent: 'arriendo',
+  sale: 'venta',
+  both: 'ambos',
+}
+
+function mapProduct(p: any): Product {
+  return { ...p, stock: p.stock_quantity ?? 0 }
 }
 
 export const productService = {
   async getAll(filters?: ProductFilters): Promise<Product[]> {
     const params = new URLSearchParams()
     if (filters?.category) params.set('category', filters.category)
-    if (filters?.type) params.set('type', filters.type)
+    if (filters?.type) params.set('type', TYPE_MAP[filters.type] || filters.type)
     if (filters?.available) params.set('available', filters.available)
     const { data } = await api.get(`/products?${params}`)
-    return data.data
+    return (data.data ?? []).map(mapProduct)
   },
 
   async getById(id: string): Promise<Product> {
     const { data } = await api.get(`/products/${id}`)
-    return data.data
+    return mapProduct(data.data)
   },
 
   async create(product: Partial<Product>): Promise<Product> {
-    const { data } = await api.post('/products', product)
-    return data.data
+    const { stock, ...rest } = product
+    const { data } = await api.post('/products', { ...rest, stock_quantity: stock })
+    return mapProduct(data.data)
   },
 
   async update(id: string, product: Partial<Product>): Promise<Product> {
-    const { data } = await api.put(`/products/${id}`, product)
-    return data.data
+    const { stock, ...rest } = product
+    const { data } = await api.put(`/products/${id}`, { ...rest, stock_quantity: stock })
+    return mapProduct(data.data)
   },
 
   async delete(id: string): Promise<void> {
@@ -43,5 +56,9 @@ export const productService = {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
     return data.data
+  },
+
+  async deleteImage(productId: string, imageId: string): Promise<void> {
+    await api.delete(`/products/${productId}/images/${imageId}`)
   },
 }

@@ -1,6 +1,15 @@
 import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { corporateInfoService } from '../../services/corporate-info.service'
+import type { CorporateInfo } from '../../types'
 
 export default function Footer() {
+  const [info, setInfo] = useState<CorporateInfo | null>(null)
+
+  useEffect(() => {
+    corporateInfoService.get().then(setInfo).catch(() => {})
+  }, [])
+
   return (
     <footer className="bg-[var(--text)] text-[var(--muted)]">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
@@ -21,8 +30,8 @@ export default function Footer() {
           <div>
             <h3 className="text-xs tracking-[0.15em] uppercase text-[var(--card)] mb-4">Contacto</h3>
             <ul className="space-y-2 text-sm">
-              <li>contacto@vestitus.cl</li>
-              <li>+56 9 1234 5678</li>
+              <li>{info?.email || 'contacto@vestitus.cl'}</li>
+              <li>{info?.phone || '+56 9 1234 5678'}</li>
             </ul>
           </div>
         </div>

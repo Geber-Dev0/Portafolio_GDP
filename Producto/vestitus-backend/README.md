@@ -10,6 +10,7 @@ API REST para plataforma de arriendo y venta de vestuario (PYME).
 - **Imágenes**: Cloudinary
 - **Seguridad**: Helmet, CORS, rate-limit, Zod validation
 - **Docker**: Multi-stage build (node:20-alpine), 227MB final image
+- **Testing**: Vitest 4 (79 tests, 100% passing)
 
 ## Requisitos
 
@@ -82,6 +83,8 @@ Producción: https://<tu-app>.onrender.com/api
 | DELETE | /api/products/:id/images/:imageId | Admin/Employee | Eliminar imagen |
 | POST | /api/check-availability | - | Verificar disponibilidad |
 | GET | /api/clients | Admin/Employee | Listar |
+| PUT | /api/clients/:id | Admin/Employee | Actualizar |
+| DELETE | /api/clients/:id | Admin | Eliminar |
 | POST | /api/clients | Sí | Crear |
 | GET | /api/rentals | Admin/Employee | Listar |
 | POST | /api/rentals | Sí | Crear |
@@ -93,10 +96,20 @@ Producción: https://<tu-app>.onrender.com/api
 | POST | /api/dispatches | Admin/Employee | Crear |
 | GET | /api/damage-types | - | Listar |
 | POST | /api/damage-types | Admin/Employee | Crear |
+| GET | /api/shipping/quote | - | Cotizar envío (query: ?address=, ?city=) |
 | GET | /api/corporate-info | - | Obtener |
 | PUT | /api/corporate-info/:id | Admin/Employee | Actualizar |
 
-## Deploy en Render
+## Tests
+
+```bash
+npm test            # ejecutar tests (79 tests, Vitest)
+npm run test:watch  # modo watch
+```
+
+Los tests cubren: autenticación, CRUD productos, arriendos, ventas, middleware, validadores.
+
+## Deploy en Vercel
 
 1. Crear repo en GitHub y pushear
 2. En Render: **New Web Service** → conectar repo

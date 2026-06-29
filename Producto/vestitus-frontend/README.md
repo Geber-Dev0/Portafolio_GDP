@@ -1,73 +1,86 @@
-# React + TypeScript + Vite
+# Vestitus Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend React para plataforma de arriendo y venta de vestuario (PYME).
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Framework**: React 19 + TypeScript
+- **Build**: Vite 8
+- **Estilos**: Tailwind CSS 4
+- **Routing**: react-router-dom 7
+- **HTTP Client**: Axios
+- **Testing**: Vitest 4 (23 tests)
+- **Calidad**: ESLint + TypeScript strict mode
 
-## React Compiler
+## Requisitos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js 20+
+- npm 10+
 
-## Expanding the ESLint configuration
+## Variables de entorno
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Copiar `.env.example` a `.env` y completar:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+VITE_API_URL=https://vestitus-api.vercel.app/api
+VITE_OPENCAGE_API_KEY=ce951a2d595d4e17afb1c77ee2817781
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Inicio rápido
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev        # desarrollo con HMR en :5173
+npm run build      # build producción → dist/
+npm run preview    # previsualizar build local
+npm test           # ejecutar tests
 ```
+
+## Rutas principales
+
+| Ruta | Página | Acceso |
+|------|--------|--------|
+| `/` | Home | Público |
+| `/products` | Catálogo | Público |
+| `/products/:id` | Detalle producto | Público |
+| `/cart` | Carrito de compras | Público |
+| `/checkout` | Checkout (auth + guest) | Público |
+| `/register` | Registro de usuario | Público |
+| `/login` | Inicio de sesión | Público |
+| `/profile` | Perfil e historial | Customer |
+| `/admin` | Panel de administración | Admin/Employee |
+| `/corporate-info` | Información corporativa | Público |
+
+## Estructura del proyecto
+
+```
+vestitus-frontend/
+├── src/
+│   ├── pages/             ← Páginas por ruta (14)
+│   ├── contexts/          ← Estado global: Auth, Cart, Toast
+│   ├── components/        ← Componentes reutilizables
+│   ├── services/          ← API calls (axios) (11)
+│   ├── hooks/             ← Custom hooks
+│   ├── utils/             ← Utilidades (RUT validation)
+│   ├── types/             ← Interfaces TypeScript
+│   ├── layouts/           ← Layouts compartidos
+│   ├── data/              ← Datos estáticos
+│   └── __tests__/         ← Tests unitarios Vitest (23 tests)
+├── public/
+├── scripts/               ← Scripts de utilidad
+├── index.html
+├── package.json
+├── vite.config.ts
+├── tsconfig.json
+└── eslint.config.js
+```
+
+## Funcionalidades principales
+
+- **Catálogo** con filtros por categoría, tipo y disponibilidad
+- **Carrito** mixto (arriendo + compra simultáneos)
+- **Checkout** con o sin registro (guest checkout)
+- **Registro** completo con RUT (módulo 11), datos personales y dirección
+- **Autocompletado de direcciones** vía OpenCageData Geocoding API
+- **Cotización de envío** multicourier (Starken + fallback regional)
+- **Panel admin** con CRUD completo de productos, clientes, arriendos, ventas, devoluciones y despachos

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { validateRut } from '../utils/rut';
 
 export const registerSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -27,7 +28,8 @@ export const productSchema = z.object({
   condition: z.string().optional(),
   is_available: z.boolean().optional(),
   size: z.string().optional(),
-  color: z.string().optional()
+  color: z.string().optional(),
+  collection: z.string().optional()
 });
 
 export const clientSchema = z.object({
@@ -36,7 +38,7 @@ export const clientSchema = z.object({
   phone: z.string().optional(),
   address: z.string().optional(),
   client_type: z.enum(['natural', 'company', 'cultural']).optional(),
-  tax_document: z.string().optional()
+  tax_document: z.string().refine(val => !val || validateRut(val), { message: 'RUT inválido' }).optional()
 });
 
 export const rentalSchema = z.object({

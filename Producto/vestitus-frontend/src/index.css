@@ -8,9 +8,6 @@
   --border: #E0D8CC;
   --text: #1A1714;
   --muted: #8A8078;
-  --accent: #1A1714;
-  --accent-2: #C4A872;
-  --gold-light: #E8D8B8;
   --gold: #C4A872;
   --gold-dark: #A88B5A;
 }
@@ -107,4 +104,13 @@ html {
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--muted);
+}
+
+/* Toast slide-up */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(1rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
 }

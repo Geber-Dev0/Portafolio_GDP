@@ -1,5 +1,7 @@
 node_modules/
 dist/
+.vite/
+*.tsbuildinfo
 .env
 .venv/
 .DS_Store
