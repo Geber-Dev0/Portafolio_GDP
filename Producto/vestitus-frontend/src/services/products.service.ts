@@ -8,6 +8,12 @@ export interface ProductFilters {
   collection?: string
 }
 
+const TYPE_MAP: Record<string, string> = {
+  rent: 'arriendo',
+  sale: 'venta',
+  both: 'ambos',
+}
+
 function mapProduct(p: any): Product {
   return { ...p, stock: p.stock_quantity ?? 0 }
 }
@@ -16,7 +22,7 @@ export const productService = {
   async getAll(filters?: ProductFilters): Promise<Product[]> {
     const params = new URLSearchParams()
     if (filters?.category) params.set('category', filters.category)
-    if (filters?.type) params.set('type', filters.type)
+    if (filters?.type) params.set('type', TYPE_MAP[filters.type] || filters.type)
     if (filters?.available) params.set('available', filters.available)
     const { data } = await api.get(`/products?${params}`)
     return (data.data ?? []).map(mapProduct)

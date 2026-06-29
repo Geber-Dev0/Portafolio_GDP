@@ -42,5 +42,6 @@ router.get('/', authenticate, authorize('admin', 'employee'), dispatchController
 router.get('/:id', authenticate, authorize('admin', 'employee'), dispatchController.getDispatchById);
 router.post('/', authenticate, authorize('admin', 'employee'), validate(dispatchSchema), dispatchController.createDispatch);
 router.put('/:id', authenticate, authorize('admin', 'employee'), dispatchController.updateDispatch);
+router.delete('/:id', authenticate, authorize('admin'), dispatchController.deleteDispatch);
 
 export default router;

@@ -21,4 +21,8 @@ export const dispatchesService = {
     const { data } = await api.put(`/dispatches/${id}`, dispatch)
     return data.data
   },
+
+  async delete(id: string): Promise<void> {
+    await api.delete(`/dispatches/${id}`)
+  },
 }

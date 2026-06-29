@@ -5,7 +5,7 @@
 ## Integrantes
 
 | Nombre | Rol |
-|--------|-----|
+|--------|------|
 | Gabriel Hermosilla | Analista de negocio / Coordinador |
 | Deyanira Leyton | Analista Funcional / Diseño UX-UI |
 | Priscila Calderón | Arquitecto cloud / Backend |
@@ -14,21 +14,22 @@
 
 ```
 Portafolio/
-├── Documentación/           ← Informe, UML, WireFrame, MER, Gantt, presentaciones
-│   ├── VestitusEA1.pdf
-│   └── VestitusEA1.pptx
-├── Gestión/                 ← Documentos de gestión del proyecto
-│   ├── 1.1.2 Documento de registro de definición e identificación del proyecto.docx
-│   └── Integrantes.txt
-├── Producto/                ← Código fuente y scripts
-│   ├── Script/
-│   │   └── vestitus-schema.sql    ← BD: tablas, P.A. y datos de prueba
-│   ├── vestitus-backend/          ← API REST (Node.js + Express + TypeScript)
-│   │   ├── src/                   ← Código fuente (controladores, servicios, rutas)
-│   │   ├── Dockerfile             ← Build multi-stage para deploy
-│   │   ├── docker-compose.yml     ← Entorno local con Docker
+├── Documentación/          ← Informes, UML, WireFrame, MER, Gantt, presentaciones
+├── Gestión/                ← Documentos de gestión del proyecto
+├── Producto/               ← Código fuente, scripts SQL y documentación técnica
+│   ├── Script/             ← Migraciones y backups SQL
+│   │   ├── vestitus-schema.sql
+│   │   ├── vestitus_backup_20250530.sql
+│   │   └── test-database-setup.sql
+│   ├── vestitus-backend/   ← API REST (Node.js + Express + TypeScript)
+│   │   ├── src/            ← Controladores, servicios, rutas, middleware
+│   │   ├── Dockerfile
+│   │   ├── docker-compose.yml
 │   │   └── package.json
-│   └── vestitus-frontend/         ← Frontend (React) - próxima fase
+│   └── vestitus-frontend/  ← Frontend React + TypeScript + Vite + Tailwind
+│       ├── src/            ← Páginas, componentes, contextos, servicios
+│       ├── index.html
+│       └── package.json
 ├── .gitignore
 └── README.md
 ```
@@ -37,27 +38,33 @@ Portafolio/
 
 | Componente | Tecnología |
 |------------|-----------|
-| Backend | Node.js + Express + TypeScript |
-| Base de datos | PostgreSQL (Supabase) |
+| Frontend | React 19 + TypeScript + Vite 8 + Tailwind CSS 4 |
+| Backend | Node.js 20 + Express + TypeScript |
+| Base de datos | PostgreSQL 15 (Supabase) |
 | Autenticación | JWT + bcrypt |
-| Imágenes | Cloudinary |
+| Imágenes | Cloudinary CDN |
+| Validación | Zod 3.23 |
+| Testing | Vitest 4 (102 tests, 100% passing) |
+| Geocoding | OpenCageData API |
+| Shipping | Multicouriers API (Starken) |
 | Contenedor | Docker (node:20-alpine) |
-| Deploy backend | Render (Docker runtime) |
-| Deploy frontend | Vercel (próxima fase) |
+| Deploy backend | Vercel |
+| Deploy frontend | Render |
 | Control de versiones | GitHub |
-
 
 ## Enlaces
 
 | Recurso | URL |
 |---------|-----|
-| Repositorio | [https://github.com/Geber-Dev0/Portafolio_GDP.git](https://github.com/Geber-Dev0/Portafolio_GDP.git) |
-| API (producción) | `https://portafolio-gdp.onrender.com/api` |
-| Swagger UI | `https://portafolio-gdp.onrender.com/api/docs` |
-| Frontend (próxima fase) | TBD |
+| Repositorio | https://github.com/Geber-Dev0/Portafolio_GDP.git |
+| API (producción) | `https://vestitus-api.vercel.app/api` |
+| Frontend | `https://vestitus-frontend.onrender.com` |
 
-## Documentación para frontend
+## Documentación técnica
 
-Ver [`Producto/vestitus-backend/front.md`](Producto/vestitus-backend/front.md) con instrucciones detalladas de conexión, endpoints, autenticación y ejemplos.
-
-> Swagger está protegido con token de acceso. Consultar al equipo para credenciales de prueba.
+| Documento | Ubicación |
+|-----------|-----------|
+| Informe diseño solución | `Producto/vestitus-backend/doc/INFORME_DISENO_SOLUCION.md` |
+| Plan de pruebas (44 casos) | `Producto/vestitus-backend/doc/PLAN_DE_PRUEBAS.md` |
+| Esquema BD completo | `Producto/Script/vestitus-schema.sql` |
+| BD de pruebas | `Producto/Script/test-database-setup.sql` |

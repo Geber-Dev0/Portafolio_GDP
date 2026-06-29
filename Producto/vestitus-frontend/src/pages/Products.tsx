@@ -4,7 +4,7 @@ import { productService, type ProductFilters } from '../services/products.servic
 import { useCart } from '../contexts/CartContext'
 import type { Product } from '../types'
 import { Search, SlidersHorizontal, X, ChevronLeft, ChevronRight, ArrowRight, Sparkles, AlertCircle } from 'lucide-react'
-import { SEASON_LABEL } from '../constants'
+import { SEASON_LABEL, sampleProducts } from '../constants'
 
 const categories = ['vestidos', 'trajes', 'casual', 'formal']
 const categoryCards = [
@@ -54,8 +54,16 @@ export default function Products() {
 
   useEffect(() => {
     productService.getAll()
-      .then(data => setAllProducts(data))
-      .catch(() => setError('Error al cargar productos. Intenta de nuevo más tarde.'))
+      .then(data => {
+        if (data.length > 0) {
+          setAllProducts(data)
+        } else {
+          setAllProducts(sampleProducts as unknown as Product[])
+        }
+      })
+      .catch(() => {
+        setAllProducts(sampleProducts as unknown as Product[])
+      })
       .finally(() => setLoading(false))
   }, [])
 

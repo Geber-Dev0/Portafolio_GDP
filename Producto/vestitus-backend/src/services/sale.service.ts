@@ -71,3 +71,24 @@ export const updateSale = async (id: string, payload: Partial<SalePayload>) => {
   if (error) throw error;
   return data;
 };
+
+export const deleteSale = async (id: string) => {
+  const { data: sale } = await supabase
+    .from('sales')
+    .select('product_id, quantity')
+    .eq('id', id)
+    .single();
+
+  if (!sale) throw new Error('Venta no encontrada');
+
+  const { error } = await supabase
+    .from('sales')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+
+  await adjustStock(sale.product_id, sale.quantity || 1);
+
+  return { message: 'Venta eliminada y stock restaurado' };
+};

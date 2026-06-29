@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS products (
   is_available boolean NOT NULL DEFAULT true,
   size text,
   color text,
-  collection text,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
@@ -34,7 +33,13 @@ CREATE TABLE IF NOT EXISTS clients (
   phone text,
   address text,
   client_type text,
-  tax_document text,
+  tax_document text UNIQUE,
+  first_name text,
+  last_name text,
+  gender text,
+  birth_date date,
+  region text,
+  commune text,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
@@ -81,6 +86,7 @@ CREATE TABLE IF NOT EXISTS sales (
   client_id uuid REFERENCES clients(id) ON DELETE CASCADE,
   product_id uuid REFERENCES products(id) ON DELETE CASCADE,
   sale_price numeric(12,2) NOT NULL DEFAULT 0,
+  quantity integer NOT NULL DEFAULT 1,
   payment_method text,
   payment_status text,
   shipping_cost numeric(12,2) NOT NULL DEFAULT 0,
@@ -381,3 +387,33 @@ INSERT INTO corporate_info (mission, vision, objectives, address, phone, email) 
     'contacto@vestitus.cl'
   )
 ON CONFLICT DO NOTHING;
+
+-- ─── Migraciones para bases existentes ───
+
+ALTER TABLE sales ADD COLUMN IF NOT EXISTS quantity integer NOT NULL DEFAULT 1;
+
+ALTER TABLE clients
+  ADD COLUMN IF NOT EXISTS first_name text,
+  ADD COLUMN IF NOT EXISTS last_name text,
+  ADD COLUMN IF NOT EXISTS gender text,
+  ADD COLUMN IF NOT EXISTS birth_date date,
+  ADD COLUMN IF NOT EXISTS region text,
+  ADD COLUMN IF NOT EXISTS commune text;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'clients_tax_document_key') THEN
+    ALTER TABLE clients ADD CONSTRAINT clients_tax_document_key UNIQUE (tax_document);
+  END IF;
+END $$;
+
+CREATE OR REPLACE FUNCTION public.decrement_stock(p_product_id uuid, p_quantity integer DEFAULT 1)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  UPDATE products
+  SET stock_quantity = stock_quantity - p_quantity
+  WHERE id = p_product_id;
+END;
+$$;

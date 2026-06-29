@@ -33,8 +33,15 @@ export interface Client {
   name: string
   email: string
   phone: string
+  address?: string
   client_type: 'natural' | 'empresa' | 'agrupacion_cultural'
   tax_document?: string
+  first_name?: string
+  last_name?: string
+  gender?: string
+  birth_date?: string
+  region?: string
+  commune?: string
   created_at: string
 }
 

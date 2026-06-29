@@ -11,6 +11,7 @@ import saleRoutes from './sale.routes';
 import dispatchRoutes from './dispatch.routes';
 import corporateRoutes from './corporate.routes';
 import damageTypeRoutes from './damage-type.routes';
+import shippingRoutes from './shipping.route';
 
 const router = Router();
 
@@ -46,6 +47,7 @@ router.use('/sales', saleRoutes);
 router.use('/dispatches', dispatchRoutes);
 router.use('/damage-types', damageTypeRoutes);
 router.use('/corporate-info', corporateRoutes);
+router.use('/shipping', shippingRoutes);
 
 router.get('/', (_req, res) => {
   res.json({ message: 'Ropa backend API is running' });
