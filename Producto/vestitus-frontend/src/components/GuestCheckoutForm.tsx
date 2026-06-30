@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useCart } from '../contexts/CartContext'
 import { clientService } from '../services/clients.service'
 import { salesService } from '../services/sales.service'
@@ -13,7 +13,6 @@ import axios from 'axios'
 
 export default function GuestCheckoutForm() {
   const { items, clearCart } = useCart()
-  const navigate = useNavigate()
 
   const [form, setForm] = useState({
     rut: '',

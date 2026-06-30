@@ -5,7 +5,7 @@ import type { GeocodingSuggestion } from '../services/geocoding.service'
 export function useAddressAutocomplete(query: string) {
   const [suggestions, setSuggestions] = useState<GeocodingSuggestion[]>([])
   const [loading, setLoading] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout>>()
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current)

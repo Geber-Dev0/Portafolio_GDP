@@ -35,7 +35,7 @@ export default function Products() {
   const initialCollection = searchParams.get('collection') || ''
   const [allProducts, setAllProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [error, _setError] = useState('')
   const [filters, setFilters] = useState<ProductFilters>({ category: initialCategory, collection: initialCollection })
   const [debouncedFilters, setDebouncedFilters] = useState<ProductFilters>({ category: initialCategory, collection: initialCollection })
   const [showFilters, setShowFilters] = useState(false)
