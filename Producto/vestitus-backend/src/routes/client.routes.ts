@@ -32,7 +32,7 @@ const router = Router();
  *               email: { type: string }
  *               phone: { type: string }
  *               address: { type: string }
- *               client_type: { type: string, enum: [natural, empresa, agrupacion] }
+ *               client_type: { type: string, enum: [natural, empresa, agrupacion_cultural] }
  *               tax_document: { type: string }
  *     responses:
  *       201:

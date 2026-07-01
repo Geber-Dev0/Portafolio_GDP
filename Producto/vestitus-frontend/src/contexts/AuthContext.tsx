@@ -25,15 +25,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const findClientId = useCallback(async (role?: string) => {
     if (localStorage.getItem(CLIENT_ID_KEY)) return
+    const email = user?.email
+    if (!email) return
+    let foundId: string | null = null
     try {
       if (role === 'admin' || role === 'employee') {
         const clients = await clientService.getAll()
-        const match = clients.find(c => c.email === user?.email)
-        if (match) saveClientId(match.id)
+        const match = clients.find(c => c.email === email)
+        if (match) foundId = match.id
       } else {
-        const client = await clientService.getSelf()
-        if (client?.id) saveClientId(client.id)
+        try {
+          const client = await clientService.getSelf()
+          if (client?.id) foundId = client.id
+        } catch {}
       }
+    } catch {}
+    if (foundId) { saveClientId(foundId); return }
+    // No client record exists — create one automatically
+    try {
+      const name = email.split('@')[0]
+      const created = await clientService.create({ name, email, client_type: 'natural' })
+      if (created?.id) saveClientId(created.id)
     } catch {}
   }, [saveClientId, user?.email])
 
@@ -70,7 +82,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const register = async (email: string, password: string) => {
-    await authService.register(email, password)
+    const res = await authService.register(email, password)
+    localStorage.setItem('token', res.token)
+    setToken(res.token)
+    setUser(res.user)
     const name = email.split('@')[0]
     const client = await clientService.create({ name, email, client_type: 'natural' })
     if (client?.id) saveClientId(client.id)

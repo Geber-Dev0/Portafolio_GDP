@@ -54,6 +54,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
           <Link to="/" className="flex items-center gap-2">
+            <img src="/Vestitus.png" alt="Vestitus" className="h-6 w-auto" />
             <span className="font-serif text-2xl tracking-tight text-[var(--text)]">Vestitus</span>
             <span className="hidden sm:inline text-xs tracking-[0.2em] uppercase text-[var(--muted)] ml-2">{SEASON_LABEL}</span>
           </Link>
@@ -83,6 +84,7 @@ export default function Navbar() {
             {user && (
               <>
                 <Link to="/profile" className="text-sm tracking-wide text-[var(--text)] hover:text-[var(--gold)] transition-colors">Perfil</Link>
+                <Link to="/purchases" className="text-sm tracking-wide text-[var(--text)] hover:text-[var(--gold)] transition-colors">Mis Compras</Link>
                 <Link to="/rentals" className="text-sm tracking-wide text-[var(--text)] hover:text-[var(--gold)] transition-colors">Mis Arriendos</Link>
               </>
             )}
@@ -145,6 +147,7 @@ export default function Navbar() {
             )}
           </div>
           {user && <Link to="/profile" className="block text-sm tracking-wide py-1" onClick={() => setMobileOpen(false)}>Perfil</Link>}
+          {user && <Link to="/purchases" className="block text-sm tracking-wide py-1" onClick={() => setMobileOpen(false)}>Mis Compras</Link>}
           {user && <Link to="/rentals" className="block text-sm tracking-wide py-1" onClick={() => setMobileOpen(false)}>Mis Arriendos</Link>}
           {isEmployee && <Link to="/admin" className="block text-sm tracking-wide py-1" onClick={() => setMobileOpen(false)}>Admin</Link>}
           <Link to="/corporate-info" className="block text-sm tracking-wide py-1" onClick={() => setMobileOpen(false)}>Nosotros</Link>

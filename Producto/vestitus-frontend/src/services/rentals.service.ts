@@ -7,6 +7,11 @@ export const rentalService = {
     return data.data
   },
 
+  async getSelf(): Promise<Rental[]> {
+    const { data } = await api.get('/rentals/self')
+    return data.data
+  },
+
   async getById(id: string): Promise<Rental> {
     const { data } = await api.get(`/rentals/${id}`)
     return data.data
@@ -20,6 +25,10 @@ export const rentalService = {
   async update(id: string, rental: Partial<Rental>): Promise<Rental> {
     const { data } = await api.put(`/rentals/${id}`, rental)
     return data.data
+  },
+
+  async cancelSelf(id: string): Promise<void> {
+    await api.post(`/rentals/self/${id}/cancel`)
   },
 
   async delete(id: string): Promise<void> {

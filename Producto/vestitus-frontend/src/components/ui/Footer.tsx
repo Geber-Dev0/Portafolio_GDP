@@ -14,7 +14,10 @@ export default function Footer() {
     <footer className="bg-[var(--text)] text-[var(--muted)]">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 flex items-center gap-3">
+            <div className="bg-white/90 rounded-lg p-0.5">
+              <img src="/Vestitus.png" alt="Vestitus" className="h-6 w-auto" />
+            </div>
             <span className="font-serif text-2xl text-[var(--card)]">Vestitus</span>
             <p className="text-sm mt-3 max-w-xs leading-relaxed">
               Plataforma de arriendo y venta de vestuario. Moda sostenible, looks extraordinarios.

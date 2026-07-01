@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import type { Product } from '../types'
+import { useToast } from './ToastContext'
 
 export interface CartItem {
   id: string
@@ -39,10 +40,12 @@ function loadCart(): CartItem[] {
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(loadCart)
+  const { showToast } = useToast()
 
   useEffect(() => { localStorage.setItem(CART_KEY, JSON.stringify(items)) }, [items])
 
   const addItem = useCallback((product: Product, type: 'rent' | 'sale', details?: { startDate?: string; endDate?: string; periodType?: string }) => {
+    showToast(`${product.name} — ${type === 'rent' ? 'arriendo' : 'compra'} agregado al carrito`, 'success')
     setItems(prev => {
       if (type === 'sale') {
         const existing = prev.find(i => i.product.id === product.id && i.type === 'sale')

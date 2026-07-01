@@ -114,3 +114,45 @@ html {
 .animate-slide-up {
   animation: slide-up 0.3s ease-out;
 }
+
+/* react-datepicker gold theme */
+.modern-calendar .react-datepicker__header {
+  background: var(--card);
+  border-bottom-color: var(--border);
+}
+.modern-calendar .react-datepicker__current-month,
+.modern-calendar .react-datepicker__day-name {
+  color: var(--text);
+}
+.modern-calendar .react-datepicker__day {
+  color: var(--text);
+}
+.modern-calendar .react-datepicker__day:hover {
+  background: var(--gold);
+  color: white;
+}
+.modern-calendar .react-datepicker__day--selected,
+.modern-calendar .react-datepicker__day--keyboard-selected {
+  background: var(--gold-dark);
+  color: white;
+}
+.modern-calendar .react-datepicker__day--today {
+  font-weight: 700;
+  color: var(--gold-dark);
+}
+.modern-calendar .react-datepicker__day--disabled {
+  color: var(--border);
+}
+.modern-calendar .react-datepicker__navigation-icon::before {
+  border-color: var(--text);
+}
+.modern-calendar .react-datepicker__triangle {
+  display: none;
+}
+.modern-calendar .react-datepicker-popper .react-datepicker {
+  background: var(--card);
+  border-color: var(--border);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+}

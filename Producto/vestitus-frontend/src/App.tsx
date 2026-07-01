@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { CartProvider } from './contexts/CartContext'
+import { ToastProvider } from './contexts/ToastContext'
 import { ProtectedRoute, AdminRoute } from './components/ui/ProtectedRoute'
 import MainLayout from './layouts/MainLayout'
 import Home from './pages/Home'
@@ -11,6 +12,7 @@ import ProductDetail from './pages/ProductDetail'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import Rentals from './pages/Rentals'
+import Purchases from './pages/Purchases'
 import Profile from './pages/Profile'
 import AdminDashboard from './pages/AdminDashboard'
 import CorporateInfo from './pages/CorporateInfo'
@@ -20,7 +22,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <CartProvider>
+        <ToastProvider>
+          <CartProvider>
           <Routes>
             <Route element={<MainLayout />}>
               <Route path="/" element={<Home />} />
@@ -32,12 +35,14 @@ export default function App() {
               <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
               <Route path="/corporate-info" element={<CorporateInfo />} />
               <Route path="/rentals" element={<ProtectedRoute><Rentals /></ProtectedRoute>} />
+              <Route path="/purchases" element={<ProtectedRoute><Purchases /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
-        </CartProvider>
+          </CartProvider>
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   )

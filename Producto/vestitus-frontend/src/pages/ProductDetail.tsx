@@ -4,10 +4,14 @@ import { productService } from '../services/products.service'
 import { useCart } from '../contexts/CartContext'
 import type { Product } from '../types'
 import { useAuth } from '../contexts/useAuth'
-import { Calendar, ChevronLeft, ChevronRight, ArrowLeft, ShoppingBag, AlertCircle } from 'lucide-react'
-import { SEASON_LABEL } from '../constants'
+import { Calendar, ChevronLeft, ChevronRight, ArrowLeft, ShoppingBag, AlertCircle, Minus, Plus } from 'lucide-react'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import { es } from 'date-fns/locale'
 
 const today = () => new Date().toISOString().split('T')[0]
+const addDays = (d: string, n: number) => { const dt = new Date(d); dt.setDate(dt.getDate() + n); return dt.toISOString().split('T')[0] }
+const calcRentalDays = (start: string, end: string) => Math.max(1, Math.round((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24)))
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>()
@@ -16,16 +20,15 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [currentImage, setCurrentImage] = useState(0)
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
-  const [periodType, setPeriodType] = useState<'days' | 'weeks' | 'months'>('days')
+  const [startDate, setStartDate] = useState(today())
+  const [endDate, setEndDate] = useState(addDays(today(), 1))
+  const [days, setDays] = useState(1)
   const [added, setAdded] = useState(false)
   const [addingSale, setAddingSale] = useState(false)
   const [addingRent, setAddingRent] = useState(false)
   const [addedSale, setAddedSale] = useState(false)
   const [dateError, setDateError] = useState('')
   const [saleError, setSaleError] = useState('')
-
   useEffect(() => {
     if (id) {
       productService.getById(id).then(setProduct).catch(console.error).finally(() => setLoading(false))
@@ -35,12 +38,13 @@ export default function ProductDetail() {
   const handleAddRentToCart = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!product) return
-    if (!startDate || !endDate) { setDateError('Selecciona fecha de inicio y término'); return }
+    if (!startDate) { setDateError('Selecciona una fecha de inicio'); return }
+    if (!endDate) { setDateError('Selecciona una fecha de término'); return }
     if (new Date(endDate) <= new Date(startDate)) { setDateError('La fecha de término debe ser posterior a la de inicio'); return }
     setDateError('')
     setAddingRent(true)
     await new Promise(r => setTimeout(r, 300))
-    addItem(product, 'rent', { startDate, endDate, periodType })
+    addItem(product, 'rent', { startDate, endDate, periodType: 'days' })
     setAddingRent(false)
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
@@ -76,7 +80,7 @@ export default function ProductDetail() {
 
       <div className="grid md:grid-cols-2 gap-12">
         <div>
-          <div className="aspect-[3/4] bg-[var(--bg)] rounded-2xl overflow-hidden relative">
+          <div className="h-[550px] xl:h-[650px] bg-[var(--bg)] rounded-2xl overflow-hidden relative">
             {product.images?.[currentImage] ? (
               <img src={product.images[currentImage].url} alt={product.name} className="w-full h-full object-cover" />
             ) : (
@@ -108,9 +112,9 @@ export default function ProductDetail() {
           )}
         </div>
 
-        <div className="flex flex-col">
-          <span className="season-label text-[var(--gold)]">{SEASON_LABEL}</span>
-          <span className={`mt-3 inline-block self-start badge ${product.type === 'rent' ? 'bg-[var(--gold)]/20 text-[var(--gold-dark)]' : product.type === 'sale' ? 'bg-[var(--text)]/10 text-[var(--text)]' : 'bg-[var(--text)]/10 text-[var(--text)]'}`}>
+        <div className="flex flex-col text-center overflow-y-auto">
+          <span className="season-label text-[var(--gold)]"></span>
+          <span className={`mt-3 inline-block self-center badge ${product.type === 'rent' ? 'bg-[var(--gold)]/20 text-[var(--gold-dark)]' : 'bg-[var(--text)] text-white'}`}>
             {product.type === 'rent' ? 'Arriendo' : product.type === 'sale' ? 'Venta' : 'Arriendo y Venta'}
           </span>
 
@@ -121,35 +125,35 @@ export default function ProductDetail() {
 
           <div className="border-t border-[var(--border)] my-8" />
 
-          <div className="space-y-3 text-sm">
+          <div className="flex justify-center gap-8 text-center text-sm">
             {product.size && (
-              <div className="flex items-center gap-3">
-                <span className="text-[var(--muted)] text-xs tracking-[0.1em] uppercase w-16">Talla</span>
-                <span className="text-[var(--text)]">{product.size}</span>
+              <div>
+                <p className="text-[var(--muted)] text-[10px] tracking-[0.1em] uppercase">Talla</p>
+                <p className="text-[var(--text)] mt-0.5">{product.size}</p>
               </div>
             )}
             {product.color && (
-              <div className="flex items-center gap-3">
-                <span className="text-[var(--muted)] text-xs tracking-[0.1em] uppercase w-16">Color</span>
-                <span className="text-[var(--text)]">{product.color}</span>
+              <div>
+                <p className="text-[var(--muted)] text-[10px] tracking-[0.1em] uppercase">Color</p>
+                <p className="text-[var(--text)] mt-0.5">{product.color}</p>
               </div>
             )}
-            <div className="flex items-center gap-3">
-              <span className="text-[var(--muted)] text-xs tracking-[0.1em] uppercase w-16">Stock</span>
-              <span className="text-[var(--text)]">{product.stock} unidades</span>
+            <div>
+              <p className="text-[var(--muted)] text-[10px] tracking-[0.1em] uppercase">Stock</p>
+              <p className="text-[var(--text)] mt-0.5">{product.stock} uds.</p>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-[var(--muted)] text-xs tracking-[0.1em] uppercase w-16">Estado</span>
-              <span className={`text-xs tracking-wide ${product.is_available ? 'text-green-700' : 'text-red-600'}`}>
+            <div>
+              <p className="text-[var(--muted)] text-[10px] tracking-[0.1em] uppercase">Estado</p>
+              <p className={`mt-0.5 text-xs ${product.is_available ? 'text-green-700' : 'text-red-600'}`}>
                 {product.is_available ? 'Disponible' : 'No disponible'}
-              </span>
+              </p>
             </div>
           </div>
 
           {product.description && (
             <>
               <div className="border-t border-[var(--border)] my-8" />
-              <p className="text-sm text-[var(--muted)] leading-relaxed">{product.description}</p>
+              <p className="text-sm text-[var(--muted)] leading-relaxed text-center">{product.description}</p>
             </>
           )}
 
@@ -170,33 +174,63 @@ export default function ProductDetail() {
 
               {(product.type === 'rent' || product.type === 'both') && (
                 <form onSubmit={handleAddRentToCart}>
-                  <h3 className="font-serif text-xl text-[var(--text)] mb-4 flex items-center gap-2">
+                  <h3 className="font-serif text-xl text-[var(--text)] mb-4 flex items-center justify-center gap-2">
                     <Calendar className="h-4 w-4 text-[var(--gold)]" /> Arriendo
                   </h3>
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Desde</label>
-                      <input type="date" min={today()} value={startDate} onChange={(e) => { setStartDate(e.target.value); setDateError('') }} required
-                        className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)]" />
+                  <div className="flex gap-4 mb-4">
+                    <div className="flex-1">
+                      <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Fecha de inicio</label>
+                      <DatePicker
+                        locale={es}
+                        selected={startDate ? new Date(startDate) : null}
+                        onChange={(d: Date | null) => {
+                          if (d) {
+                            const sd = d.toISOString().split('T')[0]
+                            setStartDate(sd)
+                            setEndDate(addDays(sd, days))
+                            setDateError('')
+                          }
+                        }}
+                        minDate={new Date()}
+                        dateFormat="d 'de' MMMM, yyyy"
+                        placeholderText="Inicio"
+                        className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm text-[var(--text)] hover:border-[var(--gold)] transition-colors outline-none focus:ring-2 focus:ring-[var(--gold)]"
+                        calendarClassName="modern-calendar"
+                        shouldCloseOnSelect
+                      />
                     </div>
-                    <div>
-                      <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Hasta</label>
-                      <input type="date" min={startDate || today()} value={endDate} onChange={(e) => { setEndDate(e.target.value); setDateError('') }} required
-                        className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)]" />
+                    <div className="flex-1">
+                      <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Fecha de término</label>
+                      <DatePicker
+                        locale={es}
+                        selected={endDate ? new Date(endDate) : null}
+                        onChange={(d: Date | null) => { if (d) { const ed = d.toISOString().split('T')[0]; setEndDate(ed); setDays(calcRentalDays(startDate, ed)); setDateError('') } }}
+                        minDate={new Date(addDays(startDate, 1))}
+                        dateFormat="d 'de' MMMM, yyyy"
+                        placeholderText="Término"
+                        className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm text-[var(--text)] hover:border-[var(--gold)] transition-colors outline-none focus:ring-2 focus:ring-[var(--gold)]"
+                        calendarClassName="modern-calendar"
+                        shouldCloseOnSelect
+                      />
                     </div>
                   </div>
                   <div className="mb-4">
-                    <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Período</label>
-                    <select value={periodType} onChange={(e) => setPeriodType(e.target.value as 'days' | 'weeks' | 'months')}
-                      className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)]">
-                      <option value="days">Días</option>
-                      <option value="weeks">Semanas</option>
-                      <option value="months">Meses</option>
-                    </select>
+                    <label className="text-xs text-[var(--muted)] block mb-1 tracking-wide">Días</label>
+                    <div className="flex items-center justify-center gap-4">
+                      <button type="button" onClick={() => { const nd = Math.max(1, days - 1); setDays(nd); setEndDate(addDays(startDate, nd)) }}
+                        className="w-10 h-10 border border-[var(--border)] rounded-full flex items-center justify-center hover:bg-[var(--surface)] transition-colors text-[var(--text)]">
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <span className="text-xl font-medium text-[var(--text)] w-8 text-center">{days}</span>
+                      <button type="button" onClick={() => { const nd = Math.min(30, days + 1); setDays(nd); setEndDate(addDays(startDate, nd)) }}
+                        className="w-10 h-10 border border-[var(--border)] rounded-full flex items-center justify-center hover:bg-[var(--surface)] transition-colors text-[var(--text)]">
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                   <button type="submit" disabled={addingRent || added}
                     className="w-full bg-[var(--text)] text-white py-3 rounded-full text-sm tracking-[0.1em] uppercase hover:bg-[var(--gold-dark)] transition-colors disabled:opacity-50">
-                    {addingRent ? 'Agregando...' : added ? '✓ Agendado' : 'Arrendar'}
+                    {addingRent ? 'Agregando...' : added ? '✓ Agendado' : `Arrendar (${days} ${days === 1 ? 'día' : 'días'})`}
                   </button>
                   {dateError && <p className="flex items-center gap-1 text-red-600 text-xs mt-2"><AlertCircle className="h-3 w-3" /> {dateError}</p>}
                 </form>

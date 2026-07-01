@@ -1,20 +1,23 @@
 import { Link } from 'react-router-dom'
 import { useCart } from '../contexts/CartContext'
 import { ShoppingBag, Trash2, ArrowLeft, Minus, Plus, AlertCircle, Info } from 'lucide-react'
-
-function calcRentalPrice(price: number, start: string, end: string, period: string): number {
-  if (!start || !end) return price
-  const days = Math.max(1, Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24)))
-  if (period === 'days') return price
-  if (period === 'weeks') return price * Math.ceil(days / 7)
-  return price * Math.ceil(days / 30)
-}
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import { es } from 'date-fns/locale'
 
 const today = () => new Date().toISOString().split('T')[0]
 
-function itemPrice(item: { product: { price: number }; type: string; quantity: number; startDate?: string; endDate?: string; periodType?: string }): number {
+function calcRentalDays(start: string, end: string): number {
+  if (!start || !end) return 1
+  return Math.max(1, Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24)))
+}
+
+const addDays = (d: string, n: number) => { const dt = new Date(d); dt.setDate(dt.getDate() + n); return dt.toISOString().split('T')[0] }
+
+function itemPrice(item: { product: { price: number }; type: string; quantity: number; startDate?: string; endDate?: string }): number {
   if (item.type === 'rent') {
-    return calcRentalPrice(item.product.price, item.startDate || '', item.endDate || '', item.periodType || 'days') * item.quantity
+    const days = calcRentalDays(item.startDate || '', item.endDate || '')
+    return item.product.price * days * item.quantity
   }
   return item.product.price * item.quantity
 }
@@ -75,25 +78,42 @@ export default function Cart() {
               <p className="text-xs text-[var(--muted)] mt-1 capitalize">{item.product.category}</p>
 
               {item.type === 'rent' && (
-                <div className="flex flex-wrap items-center gap-4 mt-3">
+                <div className="flex flex-wrap items-end gap-4 mt-3">
                   <div>
-                    <label className="text-xs text-[var(--muted)] block">Desde</label>
-                    <input type="date" min={today()} value={item.startDate || ''} onChange={(e) => updateItem(item.id, { startDate: e.target.value })}
-                      className="bg-[var(--surface)] border border-[var(--border)] rounded-full px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)] mt-1" />
+                    <label className="text-xs text-[var(--muted)] block">Inicio</label>
+                    <div className="mt-1">
+                      <DatePicker
+                        locale={es}
+                        selected={item.startDate ? new Date(item.startDate) : null}
+                        onChange={(d: Date | null) => {
+                          if (d) {
+                            const sd = d.toISOString().split('T')[0]
+                            const curDays = item.startDate && item.endDate ? calcRentalDays(item.startDate, item.endDate) : 1
+                            updateItem(item.id, { startDate: sd, endDate: addDays(sd, curDays) })
+                          }
+                        }}
+                        minDate={new Date()}
+                        placeholderText="Inicio"
+                        className="bg-[var(--surface)] border border-[var(--border)] rounded-full px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)] w-[140px]"
+                        calendarClassName="modern-calendar"
+                        shouldCloseOnSelect
+                      />
+                    </div>
                   </div>
                   <div>
-                    <label className="text-xs text-[var(--muted)] block">Hasta</label>
-                    <input type="date" min={item.startDate || today()} value={item.endDate || ''} onChange={(e) => updateItem(item.id, { endDate: e.target.value })}
-                      className="bg-[var(--surface)] border border-[var(--border)] rounded-full px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)] mt-1" />
-                  </div>
-                  <div>
-                    <label className="text-xs text-[var(--muted)] block">Período</label>
-                    <select value={item.periodType || 'days'} onChange={(e) => updateItem(item.id, { periodType: e.target.value as 'days' | 'weeks' | 'months' })}
-                      className="bg-[var(--surface)] border border-[var(--border)] rounded-full px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)] mt-1">
-                      <option value="days">Días</option>
-                      <option value="weeks">Semanas</option>
-                      <option value="months">Meses</option>
-                    </select>
+                    <label className="text-xs text-[var(--muted)] block">Término</label>
+                    <div className="mt-1">
+                      <DatePicker
+                        locale={es}
+                        selected={item.endDate ? new Date(item.endDate) : null}
+                        onChange={(d: Date | null) => { if (d) { updateItem(item.id, { endDate: d.toISOString().split('T')[0] }) } }}
+                        minDate={item.startDate ? new Date(addDays(item.startDate, 1)) : new Date(addDays(today(), 1))}
+                        placeholderText="Término"
+                        className="bg-[var(--surface)] border border-[var(--border)] rounded-full px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[var(--gold)] text-[var(--text)] w-[140px]"
+                        calendarClassName="modern-calendar"
+                        shouldCloseOnSelect
+                      />
+                    </div>
                   </div>
                 </div>
               )}

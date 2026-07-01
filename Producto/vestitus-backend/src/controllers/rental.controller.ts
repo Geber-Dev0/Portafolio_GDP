@@ -1,12 +1,45 @@
 import { Request, Response } from 'express';
 import * as rentalService from '@services/rental.service';
+import * as clientService from '@services/client.service';
+import * as productService from '@services/product.service';
+
+export const cancelSelfRental = async (req: Request, res: Response) => {
+  try {
+    const client = await clientService.findClientByEmail(req.user!.email);
+    if (!client) return res.status(404).json({ success: false, message: 'Cliente no encontrado' });
+    const { id } = req.params;
+    const rental = await rentalService.findRentalById(id);
+    if (rental.client_id !== client.id) return res.status(403).json({ success: false, message: 'No tienes permiso para cancelar este arriendo' });
+    if (rental.status !== 'active' && rental.status !== 'confirmed') return res.status(400).json({ success: false, message: 'Solo se pueden cancelar arriendos activos' });
+    await rentalService.updateRental(id, { status: 'cancelled' });
+    await productService.adjustStock(rental.product_id, 1);
+    res.json({ success: true, message: 'Arriendo cancelado correctamente' });
+  } catch {
+    res.status(500).json({ success: false, message: 'Error al cancelar arriendo' });
+  }
+};
+
+export const getSelfRentals = async (req: Request, res: Response) => {
+  try {
+    const client = await clientService.findClientByEmail(req.user!.email);
+    if (!client) return res.status(404).json({ success: false, message: 'Cliente no encontrado' });
+    const rentals = await rentalService.findRentalsByClientId(client.id);
+    const mapped = rentals.map(r => ({
+      ...r,
+      product: r.products ? { ...r.products, images: (r.products as any).product_images || [] } : r.products,
+    }));
+    res.json({ success: true, data: mapped });
+  } catch {
+    res.status(500).json({ success: false, message: 'Error al obtener arriendos' });
+  }
+};
 
 export const getRentals = async (_req: Request, res: Response) => {
   try {
     const rentals = await rentalService.findRentals();
     const mapped = rentals.map(r => ({
       ...r,
-      product: r.product ? { ...r.product, images: (r.product as any).product_images || [] } : r.product,
+      product: r.products ? { ...r.products, images: (r.products as any).product_images || [] } : r.products,
     }));
     res.json({ success: true, data: mapped });
   } catch {
@@ -20,7 +53,7 @@ export const getRentalById = async (req: Request, res: Response) => {
     const rental = await rentalService.findRentalById(id);
     const mapped = {
       ...rental,
-      product: rental.product ? { ...rental.product, images: (rental.product as any).product_images || [] } : rental.product,
+      product: rental.products ? { ...rental.products, images: (rental.products as any).product_images || [] } : rental.products,
     };
     res.json({ success: true, data: mapped });
   } catch {
