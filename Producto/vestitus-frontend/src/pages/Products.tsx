@@ -4,7 +4,7 @@ import { productService, type ProductFilters } from '../services/products.servic
 import { useCart } from '../contexts/CartContext'
 import type { Product } from '../types'
 import { Search, SlidersHorizontal, X, ChevronLeft, ChevronRight, ArrowRight, Sparkles, AlertCircle } from 'lucide-react'
-import { SEASON_LABEL } from '../constants'
+import { SEASON_LABEL, sampleProducts } from '../constants'
 
 const categories = ['vestidos', 'trajes', 'casual', 'formal']
 const categoryCards = [
@@ -18,7 +18,7 @@ const PAGE_SIZE = 12
 const FALLBACK_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000"%3E%3Crect fill="%23E0D8CC" width="800" height="1000"/%3E%3Ctext fill="%238A8078" font-family="sans-serif" font-size="20" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3E%3C/text%3E%3C/svg%3E'
 const BANNER_IMG = 'https://images.unsplash.com/photo-1774544349354-6fbe1de7f0d3?w=1600&q=80'
 
-const OTONO_INVIERNO_NAMES = new Set([
+const INVIERNO_NAMES = new Set([
   'Chaleco Acolchado',
   'Abrigo Largo Lana',
   'Parka Invierno Verde Oliva',
@@ -31,22 +31,18 @@ export default function Products() {
   const { addItem } = useCart()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+  const initialCategory = searchParams.get('category') || ''
+  const initialCollection = searchParams.get('collection') || ''
   const [allProducts, setAllProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [filters, setFilters] = useState<ProductFilters>({ category: searchParams.get('category') || '', collection: searchParams.get('collection') || '' })
-  const [debouncedFilters, setDebouncedFilters] = useState<ProductFilters>({ category: searchParams.get('category') || '', collection: searchParams.get('collection') || '' })
+  const [error, _setError] = useState('')
+  const [filters, setFilters] = useState<ProductFilters>({ category: initialCategory, collection: initialCollection })
+  const [debouncedFilters, setDebouncedFilters] = useState<ProductFilters>({ category: initialCategory, collection: initialCollection })
   const [showFilters, setShowFilters] = useState(false)
   const [page, setPage] = useState(1)
   const [addedId, setAddedId] = useState<string | null>(null)
   const productsRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-
-  useEffect(() => {
-    const category = searchParams.get('category') || ''
-    const collection = searchParams.get('collection') || ''
-    setFilters(f => ({ ...f, category, collection }))
-  }, [searchParams])
 
   useEffect(() => {
     debounceRef.current = setTimeout(() => {
@@ -58,16 +54,24 @@ export default function Products() {
 
   useEffect(() => {
     productService.getAll()
-      .then(data => setAllProducts(data))
-      .catch(() => setError('Error al cargar productos. Intenta de nuevo más tarde.'))
+      .then(data => {
+        if (data.length > 0) {
+          setAllProducts(data)
+        } else {
+          setAllProducts(sampleProducts as unknown as Product[])
+        }
+      })
+      .catch(() => {
+        setAllProducts(sampleProducts as unknown as Product[])
+      })
       .finally(() => setLoading(false))
   }, [])
 
   const filtered = allProducts.filter(p => {
     if (debouncedFilters.category && p.category !== debouncedFilters.category) return false
     if (debouncedFilters.type && p.type !== debouncedFilters.type) return false
-    if (debouncedFilters.collection === 'otono-invierno') {
-      if (!OTONO_INVIERNO_NAMES.has(p.name)) return false
+    if (debouncedFilters.collection === 'invierno') {
+      if (!INVIERNO_NAMES.has(p.name)) return false
     } else if (debouncedFilters.collection && p.collection !== debouncedFilters.collection) {
       return false
     }
@@ -113,7 +117,7 @@ export default function Products() {
           <p className="text-[var(--card)]/70 text-lg md:text-xl max-w-lg mt-4">
             Descubre nuestra colección Otoño/Invierno. Prendas exclusivas para arriendo y venta.
           </p>
-          <button onClick={() => navigate('/products?collection=otono-invierno')}
+          <button onClick={() => navigate('/products?collection=invierno')}
             className="mt-8 inline-flex items-center gap-2 bg-[var(--gold)] text-[var(--text)] px-8 py-3 rounded-full text-sm tracking-[0.1em] uppercase font-medium hover:bg-[var(--card)] transition-all">
             <Sparkles className="h-4 w-4" /> Explorar Colección
           </button>
@@ -176,7 +180,7 @@ export default function Products() {
             <div>
               <span className="season-label text-[var(--gold)]">Catálogo</span>
               <h2 className="font-serif text-3xl md:text-4xl text-[var(--text)] mt-2">
-                {filters.collection === 'otono-invierno' ? 'Colección Otoño/Invierno' : filters.category ? filters.category.charAt(0).toUpperCase() + filters.category.slice(1) : 'Todas las prendas'}
+                {filters.collection === 'invierno' ? 'Colección Invierno' : filters.category ? filters.category.charAt(0).toUpperCase() + filters.category.slice(1) : 'Todas las prendas'}
               </h2>
             </div>
             <button onClick={() => setShowFilters(!showFilters)}
@@ -227,10 +231,10 @@ export default function Products() {
 
           {activeFilterCount > 0 && (
             <div className="flex items-center gap-2 -mt-2 mb-10 flex-wrap">
-              {filters.collection === 'otono-invierno' && (
+              {filters.collection === 'invierno' && (
                 <button onClick={() => setFilters({ ...filters, collection: '' })}
                   className="badge bg-[var(--gold)]/20 text-[var(--gold-dark)] hover:bg-[var(--gold)]/30 transition-colors flex items-center gap-1">
-                  Colección: Otoño/Invierno <X className="h-3 w-3" />
+                  Colección: Invierno <X className="h-3 w-3" />
                 </button>
               )}
               {filters.category && (
@@ -290,21 +294,21 @@ export default function Products() {
                           </div>
                         )}
                         <div className="absolute top-3 left-3">
-                          <span className={`badge ${product.type === 'rent' ? 'bg-[var(--gold)]/20 text-[var(--gold-dark)]' : 'bg-[var(--text)] text-white'}`}>
+                          <span className={`badge ${product.type === 'rent' ? 'bg-[var(--gold)]/20 text-[var(--gold-dark)]' : 'bg-[var(--text)]/10 text-[var(--text)]'}`}>
                             {product.type === 'rent' ? 'Arriendo' : product.type === 'sale' ? 'Venta' : 'Dual'}
                           </span>
                         </div>
                       </div>
-                      <div className="p-4 flex-1 flex flex-col justify-between text-center">
+                      <div className="p-4 flex-1 flex flex-col justify-between">
                         <div>
                           <h3 className="font-serif text-lg text-[var(--text)] group-hover:text-[var(--gold-dark)] transition-colors">{product.name}</h3>
                           <p className="text-xs text-[var(--muted)] mt-1 capitalize tracking-wide">{product.category}</p>
                         </div>
                         <div className="mt-3">
-                          <div className="flex justify-center">
+                          <div className="flex items-center justify-between">
                             <span className="font-sans text-lg font-medium text-[var(--text)] price">${product.price.toLocaleString('es-CL')}</span>
                           </div>
-                          {product.stock > 0 ? (
+                          {product.is_available && (
                             <div className="mt-2 flex gap-2">
                               {(product.type === 'sale' || product.type === 'both') && (
                                 <button onClick={(e) => handleAddToCart(e, product, 'sale')}
@@ -315,16 +319,10 @@ export default function Products() {
                               )}
                               {(product.type === 'rent' || product.type === 'both') && (
                                 <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/products/${product.id}`) }}
-                                  className="flex-1 text-xs tracking-[0.1em] uppercase border border-[var(--gold-dark)] text-[var(--gold-dark)] py-2 rounded-full hover:bg-[var(--gold-dark)] hover:text-white transition-colors text-center">
+                                  className="flex-1 text-xs tracking-[0.1em] uppercase border border-[var(--border)] text-[var(--text)] py-2 rounded-full hover:bg-[var(--surface)] transition-colors text-center">
                                   Arrendar
                                 </button>
                               )}
-                            </div>
-                          ) : (
-                            <div className="mt-2">
-                              <span className="block text-center text-xs tracking-[0.1em] uppercase text-red-600 font-medium py-2 rounded-full border border-red-200 bg-red-50">
-                                Sin existencias
-                              </span>
                             </div>
                           )}
                         </div>

@@ -49,3 +49,13 @@ export const updateDispatch = async (id: string, payload: Partial<DispatchPayloa
   if (error) throw error;
   return data;
 };
+
+export const deleteDispatch = async (id: string) => {
+  const { error } = await supabase
+    .from('dispatches')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+  return { message: 'Despacho eliminado' };
+};

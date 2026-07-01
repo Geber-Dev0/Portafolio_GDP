@@ -33,7 +33,13 @@ CREATE TABLE IF NOT EXISTS clients (
   phone text,
   address text,
   client_type text,
-  tax_document text,
+  tax_document text UNIQUE,
+  first_name text,
+  last_name text,
+  gender text,
+  birth_date date,
+  region text,
+  commune text,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
@@ -385,6 +391,20 @@ ON CONFLICT DO NOTHING;
 -- ─── Migraciones para bases existentes ───
 
 ALTER TABLE sales ADD COLUMN IF NOT EXISTS quantity integer NOT NULL DEFAULT 1;
+
+ALTER TABLE clients
+  ADD COLUMN IF NOT EXISTS first_name text,
+  ADD COLUMN IF NOT EXISTS last_name text,
+  ADD COLUMN IF NOT EXISTS gender text,
+  ADD COLUMN IF NOT EXISTS birth_date date,
+  ADD COLUMN IF NOT EXISTS region text,
+  ADD COLUMN IF NOT EXISTS commune text;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'clients_tax_document_key') THEN
+    ALTER TABLE clients ADD CONSTRAINT clients_tax_document_key UNIQUE (tax_document);
+  END IF;
+END $$;
 
 CREATE OR REPLACE FUNCTION public.decrement_stock(p_product_id uuid, p_quantity integer DEFAULT 1)
 RETURNS void

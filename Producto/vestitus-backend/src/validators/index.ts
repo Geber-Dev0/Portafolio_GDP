@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { validateRut } from '../utils/rut';
 
 export const registerSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -27,7 +28,8 @@ export const productSchema = z.object({
   condition: z.string().optional(),
   is_available: z.boolean().optional(),
   size: z.string().optional(),
-  color: z.string().optional()
+  color: z.string().optional(),
+  collection: z.string().optional()
 });
 
 export const clientSchema = z.object({
@@ -35,8 +37,8 @@ export const clientSchema = z.object({
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   phone: z.string().optional(),
   address: z.string().optional(),
-  client_type: z.enum(['natural', 'empresa', 'agrupacion_cultural']).optional(),
-  tax_document: z.string().optional()
+  client_type: z.enum(['natural', 'company', 'cultural']).optional(),
+  tax_document: z.string().refine(val => !val || validateRut(val), { message: 'RUT inválido' }).optional()
 });
 
 export const rentalSchema = z.object({
@@ -47,7 +49,7 @@ export const rentalSchema = z.object({
   period_type: z.enum(['days', 'weeks', 'months']),
   appointment_date: z.string().optional(),
   appointment_time: z.string().optional(),
-  status: z.enum(['active', 'completed', 'cancelled']).optional()
+  status: z.string().optional()
 });
 
 export const returnSchema = z.object({
@@ -63,7 +65,6 @@ export const saleSchema = z.object({
   client_id: z.string().uuid('Cliente inválido'),
   product_id: z.string().uuid('Producto inválido'),
   sale_price: z.number().min(0, 'El precio no puede ser negativo'),
-  quantity: z.number().int().min(1, 'La cantidad debe ser al menos 1').optional(),
   payment_method: z.string().optional(),
   payment_status: z.string().optional(),
   shipping_cost: z.number().min(0).optional(),

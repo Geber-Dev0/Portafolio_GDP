@@ -62,3 +62,13 @@ export const updateSale = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: 'Error al actualizar venta' });
   }
 };
+
+export const deleteSale = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const result = await saleService.deleteSale(id);
+    res.json({ success: true, data: result });
+  } catch {
+    res.status(500).json({ success: false, message: 'Error al eliminar venta' });
+  }
+};

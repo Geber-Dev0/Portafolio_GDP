@@ -4,10 +4,11 @@ import { rentalService } from '../services/rentals.service'
 import { clientService } from '../services/clients.service'
 import { salesService } from '../services/sales.service'
 import { returnsService } from '../services/returns.service'
+import { dispatchesService } from '../services/dispatches.service'
 import { damageTypesService } from '../services/damage-types.service'
 import { corporateInfoService } from '../services/corporate-info.service'
-import type { Product, Rental, Client, Sale, Return as ReturnType, DamageType, CorporateInfo, ProductImage } from '../types'
-import { LayoutDashboard, Package, CalendarDays, Users, Plus, ChevronLeft, ChevronRight, DollarSign, Undo2, AlertTriangle, Building2, Upload, Pencil, Trash2, Image as ImageIcon, X, AlertCircle, CheckCircle2 } from 'lucide-react'
+import type { Product, Rental, Client, Sale, Return as ReturnType, Dispatch, DamageType, CorporateInfo, ProductImage } from '../types'
+import { LayoutDashboard, Package, CalendarDays, Users, Plus, ChevronLeft, ChevronRight, DollarSign, Undo2, AlertTriangle, Building2, Upload, Pencil, Trash2, Image as ImageIcon, X, AlertCircle, CheckCircle2, Truck } from 'lucide-react'
 
 const CATEGORIES = ['vestidos', 'trajes', 'casual', 'formal']
 const PAGE_SIZE = 10
@@ -53,7 +54,7 @@ const TABS = [
   { key: 'clients', label: 'Clientes', icon: Users },
   { key: 'sales', label: 'Ventas', icon: DollarSign },
   { key: 'returns', label: 'Devoluciones', icon: Undo2 },
-  { key: 'dispatches', label: 'Despachos', icon: AlertTriangle },
+  { key: 'dispatches', label: 'Despachos', icon: Truck },
   { key: 'damage-types', label: 'Daños', icon: AlertTriangle },
   { key: 'corporate-info', label: 'Info Corporativa', icon: Building2 },
 ] as const
@@ -773,14 +774,37 @@ function AdminSales() {
   const [sales, setSales] = useState<Sale[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
-  useEffect(() => {
-    salesService.getAll()
-      .then(setSales)
-      .catch(() => setToast({ message: 'Error al cargar ventas', type: 'error' }))
-      .finally(() => setLoading(false))
+  const load = useCallback(async () => {
+    try { const data = await salesService.getAll(); setSales(data) } finally { setLoading(false) }
   }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const handleCancel = async (id: string) => {
+    try {
+      await salesService.update(id, { payment_status: 'cancelled' })
+      setToast({ message: 'Venta cancelada correctamente', type: 'success' })
+      load()
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'Error al cancelar venta'
+      setToast({ message: msg, type: 'error' })
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      await salesService.delete(id)
+      setDeleteTarget(null)
+      setToast({ message: 'Venta eliminada y stock restaurado', type: 'success' })
+      setPage(1); load()
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'Error al eliminar venta'
+      setToast({ message: msg, type: 'error' })
+    }
+  }
 
   if (loading) return <div className="animate-pulse h-40 bg-[var(--border)] rounded-2xl" />
 
@@ -790,6 +814,10 @@ function AdminSales() {
   return (
     <div>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
+      <ConfirmModal open={!!deleteTarget} title="Eliminar venta" message="¿Estás seguro de eliminar esta venta? El stock será restaurado."
+        onConfirm={() => deleteTarget && handleDelete(deleteTarget)} onCancel={() => setDeleteTarget(null)} />
+
       <h2 className="font-serif text-xl text-[var(--text)] mb-6">Ventas <span className="text-[var(--muted)] font-sans text-sm">({sales.length})</span></h2>
       <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] overflow-hidden">
         <table className="w-full text-sm">
@@ -800,6 +828,7 @@ function AdminSales() {
               <th className="text-right p-4 font-medium">Total</th>
               <th className="text-center p-4 font-medium">Pago</th>
               <th className="text-left p-4 font-medium">Fecha</th>
+              <th className="text-center p-4 font-medium">Acción</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--border)]">
@@ -814,6 +843,14 @@ function AdminSales() {
                   </span>
                 </td>
                 <td className="p-4 text-[var(--muted)] text-xs">{new Date(s.created_at).toLocaleDateString()}</td>
+                <td className="p-4 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    {s.payment_status !== 'cancelled' && (
+                      <button onClick={() => handleCancel(s.id)} className="text-xs text-amber-600 hover:text-amber-800 transition-colors tracking-wide">Anular</button>
+                    )}
+                    <button onClick={() => setDeleteTarget(s.id)} className="text-xs text-red-600 hover:text-red-800 transition-colors tracking-wide">Eliminar</button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -828,16 +865,62 @@ function AdminSales() {
 
 function AdminReturns() {
   const [returns, setReturns] = useState<ReturnType[]>([])
+  const [rentals, setRentals] = useState<Rental[]>([])
+  const [damageTypes, setDamageTypes] = useState<DamageType[]>([])
   const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [form, setForm] = useState({ rental_id: '', product_state: 'good', damage_type_id: '', notes: '' })
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+  const [submitting, setSubmitting] = useState(false)
   const [page, setPage] = useState(1)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
-  useEffect(() => {
-    returnsService.getAll()
-      .then(setReturns)
-      .catch(() => setToast({ message: 'Error al cargar devoluciones', type: 'error' }))
-      .finally(() => setLoading(false))
+  const load = useCallback(async () => {
+    try {
+      const [rData, rlData, dtData] = await Promise.all([
+        returnsService.getAll(),
+        rentalService.getAll(),
+        damageTypesService.getAll(),
+      ])
+      setReturns(rData); setRentals(rlData); setDamageTypes(dtData)
+    } finally { setLoading(false) }
   }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const validate = () => {
+    const errs: Record<string, string> = {}
+    if (!form.rental_id) errs.rental_id = 'Selecciona un arriendo'
+    if (!form.product_state) errs.product_state = 'Selecciona el estado del producto'
+    setFormErrors(errs)
+    return Object.keys(errs).length === 0
+  }
+
+  const openCreate = () => {
+    setForm({ rental_id: '', product_state: 'good', damage_type_id: '', notes: '' })
+    setFormErrors({})
+    setShowForm(true)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!validate()) return
+    setSubmitting(true)
+    try {
+      await returnsService.create({
+        rental_id: form.rental_id,
+        product_state: form.product_state,
+        damage_type_id: form.damage_type_id || undefined,
+      })
+      setToast({ message: 'Devolución registrada correctamente', type: 'success' })
+      setShowForm(false); setPage(1); load()
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'Error al registrar devolución'
+      setToast({ message: msg, type: 'error' })
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   if (loading) return <div className="animate-pulse h-40 bg-[var(--border)] rounded-2xl" />
 
@@ -847,7 +930,62 @@ function AdminReturns() {
   return (
     <div>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-      <h2 className="font-serif text-xl text-[var(--text)] mb-6">Devoluciones <span className="text-[var(--muted)] font-sans text-sm">({returns.length})</span></h2>
+
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="font-serif text-xl text-[var(--text)]">Devoluciones <span className="text-[var(--muted)] font-sans text-sm">({returns.length})</span></h2>
+        <button onClick={() => showForm ? setShowForm(false) : openCreate()}
+          className="flex items-center gap-2 bg-[var(--text)] text-[var(--card)] px-5 py-2.5 rounded-full text-xs tracking-[0.1em] uppercase hover:bg-[var(--gold-dark)] transition-colors">
+          <Plus className="h-3.5 w-3.5" /> {showForm ? 'Cancelar' : 'Nueva Devolución'}
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleSubmit} className="bg-[var(--card)] p-6 rounded-2xl border border-[var(--border)] mb-8 grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div>
+            <label className="text-xs tracking-[0.1em] uppercase text-[var(--muted)] block mb-1.5">Arriendo</label>
+            <select value={form.rental_id} onChange={(e) => { setForm({ ...form, rental_id: e.target.value }); setFormErrors({ ...formErrors, rental_id: '' }) }} required
+              className={`w-full bg-[var(--surface)] border rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--gold)] ${formErrors.rental_id ? 'border-red-400' : 'border-[var(--border)]'}`}>
+              <option value="">Seleccionar arriendo</option>
+              {rentals.filter(r => r.status !== 'cancelled').map((rl) => (
+                <option key={rl.id} value={rl.id}>{rl.product?.name || rl.product_id.slice(0, 8)} — {new Date(rl.start_date).toLocaleDateString()}</option>
+              ))}
+            </select>
+            {formErrors.rental_id && <p className="text-red-500 text-[10px] mt-1">{formErrors.rental_id}</p>}
+          </div>
+          <div>
+            <label className="text-xs tracking-[0.1em] uppercase text-[var(--muted)] block mb-1.5">Estado del Producto</label>
+            <select value={form.product_state} onChange={(e) => setForm({ ...form, product_state: e.target.value })}
+              className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--gold)]">
+              <option value="good">Bueno</option>
+              <option value="fair">Regular</option>
+              <option value="damaged">Dañado</option>
+              <option value="lost">Perdido</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs tracking-[0.1em] uppercase text-[var(--muted)] block mb-1.5">Tipo de Daño</label>
+            <select value={form.damage_type_id} onChange={(e) => setForm({ ...form, damage_type_id: e.target.value })}
+              className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--gold)]">
+              <option value="">Sin daño</option>
+              {damageTypes.map((dt) => (
+                <option key={dt.id} value={dt.id}>{dt.name} (+${dt.surcharge_amount.toLocaleString('es-CL')})</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs tracking-[0.1em] uppercase text-[var(--muted)] block mb-1.5">Notas</label>
+            <input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--gold)]" />
+          </div>
+          <div className="md:col-span-2">
+            <button type="submit" disabled={submitting}
+              className="bg-[var(--text)] text-[var(--card)] px-6 py-2.5 rounded-full text-xs tracking-[0.1em] uppercase hover:bg-[var(--gold-dark)] transition-colors btn-gold disabled:opacity-50 disabled:cursor-not-allowed">
+              {submitting ? 'Guardando...' : 'Registrar Devolución'}
+            </button>
+          </div>
+        </form>
+      )}
+
       <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-[var(--surface)] text-[var(--muted)] text-xs tracking-[0.05em] uppercase">
@@ -878,13 +1016,175 @@ function AdminReturns() {
 /* ───── DESPACHOS ───── */
 
 function AdminDispatches() {
+  const [items, setItems] = useState<Dispatch[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [form, setForm] = useState({ sale_id: '', rental_id: '', courier: '', tracking_number: '', cost: 0, status: 'pending' as Dispatch['status'] })
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [page, setPage] = useState(1)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+
+  const load = useCallback(async () => {
+    try { const data = await dispatchesService.getAll(); setItems(data) } finally { setLoading(false) }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const validate = () => {
+    const errs: Record<string, string> = {}
+    if (!form.courier.trim()) errs.courier = 'El courier es obligatorio'
+    if (!form.tracking_number.trim()) errs.tracking_number = 'El número de seguimiento es obligatorio'
+    if (form.cost < 0) errs.cost = 'El costo no puede ser negativo'
+    setFormErrors(errs)
+    return Object.keys(errs).length === 0
+  }
+
+  const openCreate = () => {
+    setEditingId(null)
+    setForm({ sale_id: '', rental_id: '', courier: '', tracking_number: '', cost: 0, status: 'pending' })
+    setFormErrors({})
+    setShowForm(true)
+  }
+
+  const openEdit = (d: Dispatch) => {
+    setEditingId(d.id)
+    setForm({ sale_id: d.sale_id || '', rental_id: d.rental_id || '', courier: d.courier, tracking_number: d.tracking_number, cost: d.cost, status: d.status })
+    setFormErrors({})
+    setShowForm(true)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!validate()) return
+    setSubmitting(true)
+    try {
+      if (editingId) {
+        await dispatchesService.update(editingId, form)
+        setToast({ message: 'Despacho actualizado correctamente', type: 'success' })
+      } else {
+        await dispatchesService.create(form)
+        setToast({ message: 'Despacho creado correctamente', type: 'success' })
+      }
+      setShowForm(false); setEditingId(null); setPage(1); load()
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'Error al guardar el despacho'
+      setToast({ message: msg, type: 'error' })
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      await dispatchesService.delete(id); setDeleteTarget(null)
+      setToast({ message: 'Despacho eliminado correctamente', type: 'success' })
+      setPage(1); load()
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'Error al eliminar el despacho'
+      setToast({ message: msg, type: 'error' })
+    }
+  }
+
+  if (loading) return <div className="animate-pulse h-40 bg-[var(--border)] rounded-2xl" />
+
+  const totalPages = Math.ceil(items.length / PAGE_SIZE)
+  const paginated = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
   return (
-    <div className="text-center py-20 bg-[var(--card)] rounded-2xl border border-[var(--border)]">
-      <AlertTriangle className="h-10 w-10 text-[var(--muted)] mx-auto mb-4" />
-      <h3 className="font-serif text-xl text-[var(--text)] mb-2">Módulo en Construcción</h3>
-      <p className="text-sm text-[var(--muted)] max-w-md mx-auto">
-        El módulo de despachos estará disponible próximamente. Estamos trabajando para ofrecerte la mejor experiencia de envío.
-      </p>
+    <div>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
+      <ConfirmModal open={!!deleteTarget} title="Eliminar despacho" message="¿Estás seguro de eliminar este despacho?"
+        onConfirm={() => deleteTarget && handleDelete(deleteTarget)} onCancel={() => setDeleteTarget(null)} />
+
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="font-serif text-xl text-[var(--text)]">Despachos <span className="text-[var(--muted)] font-sans text-sm">({items.length})</span></h2>
+        <button onClick={() => showForm ? setShowForm(false) : openCreate()}
+          className="flex items-center gap-2 bg-[var(--text)] text-[var(--card)] px-5 py-2.5 rounded-full text-xs tracking-[0.1em] uppercase hover:bg-[var(--gold-dark)] transition-colors">
+          <Plus className="h-3.5 w-3.5" /> {showForm ? 'Cancelar' : 'Nuevo'}
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleSubmit} className="bg-[var(--card)] p-6 rounded-2xl border border-[var(--border)] mb-8 grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div>
+            <label className="text-xs tracking-[0.1em] uppercase text-[var(--muted)] block mb-1.5">Courier</label>
+            <input value={form.courier} onChange={(e) => { setForm({ ...form, courier: e.target.value }); setFormErrors({ ...formErrors, courier: '' }) }} required
+              className={`w-full bg-[var(--surface)] border rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--gold)] ${formErrors.courier ? 'border-red-400' : 'border-[var(--border)]'}`} />
+            {formErrors.courier && <p className="text-red-500 text-[10px] mt-1">{formErrors.courier}</p>}
+          </div>
+          <div>
+            <label className="text-xs tracking-[0.1em] uppercase text-[var(--muted)] block mb-1.5">N° Seguimiento</label>
+            <input value={form.tracking_number} onChange={(e) => { setForm({ ...form, tracking_number: e.target.value }); setFormErrors({ ...formErrors, tracking_number: '' }) }} required
+              className={`w-full bg-[var(--surface)] border rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--gold)] ${formErrors.tracking_number ? 'border-red-400' : 'border-[var(--border)]'}`} />
+            {formErrors.tracking_number && <p className="text-red-500 text-[10px] mt-1">{formErrors.tracking_number}</p>}
+          </div>
+          <div>
+            <label className="text-xs tracking-[0.1em] uppercase text-[var(--muted)] block mb-1.5">Costo</label>
+            <input type="number" value={form.cost} onChange={(e) => { setForm({ ...form, cost: Number(e.target.value) }); setFormErrors({ ...formErrors, cost: '' }) }} required
+              className={`w-full bg-[var(--surface)] border rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--gold)] ${formErrors.cost ? 'border-red-400' : 'border-[var(--border)]'}`} />
+            {formErrors.cost && <p className="text-red-500 text-[10px] mt-1">{formErrors.cost}</p>}
+          </div>
+          <div>
+            <label className="text-xs tracking-[0.1em] uppercase text-[var(--muted)] block mb-1.5">Estado</label>
+            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as Dispatch['status'] })}
+              className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--gold)]">
+              <option value="pending">Pendiente</option>
+              <option value="shipped">Enviado</option>
+              <option value="delivered">Entregado</option>
+            </select>
+          </div>
+          <div className="md:col-span-2">
+            <button type="submit" disabled={submitting}
+              className="bg-[var(--text)] text-[var(--card)] px-6 py-2.5 rounded-full text-xs tracking-[0.1em] uppercase hover:bg-[var(--gold-dark)] transition-colors btn-gold disabled:opacity-50 disabled:cursor-not-allowed">
+              {submitting ? 'Guardando...' : editingId ? 'Actualizar Despacho' : 'Crear Despacho'}
+            </button>
+          </div>
+        </form>
+      )}
+
+      <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-[var(--surface)] text-[var(--muted)] text-xs tracking-[0.05em] uppercase">
+            <tr>
+              <th className="text-left p-4 font-medium">Courier</th>
+              <th className="text-left p-4 font-medium">Seguimiento</th>
+              <th className="text-right p-4 font-medium">Costo</th>
+              <th className="text-center p-4 font-medium">Estado</th>
+              <th className="text-left p-4 font-medium">Fecha</th>
+              <th className="text-center p-4 font-medium">Acción</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[var(--border)]">
+            {paginated.map((d) => (
+              <tr key={d.id} className="hover:bg-[var(--surface)] transition-colors">
+                <td className="p-4 font-medium text-[var(--text)]">{d.courier}</td>
+                <td className="p-4 text-[var(--muted)]">{d.tracking_number}</td>
+                <td className="p-4 text-right text-[var(--text)]">${d.cost.toLocaleString('es-CL')}</td>
+                <td className="p-4 text-center">
+                  <span className={`badge ${d.status === 'delivered' ? 'bg-green-100 text-green-800' : d.status === 'shipped' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'}`}>
+                    {d.status === 'delivered' ? 'Entregado' : d.status === 'shipped' ? 'Enviado' : 'Pendiente'}
+                  </span>
+                </td>
+                <td className="p-4 text-[var(--muted)] text-xs">{new Date(d.created_at).toLocaleDateString()}</td>
+                <td className="p-4 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <button onClick={() => openEdit(d)} className="text-xs text-[var(--text)] hover:text-[var(--gold-dark)] transition-colors tracking-wide flex items-center gap-1">
+                      <Pencil className="h-3 w-3" /> Editar
+                    </button>
+                    <button onClick={() => setDeleteTarget(d.id)} className="text-xs text-red-600 hover:text-red-800 transition-colors tracking-wide">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <Pagination current={page} total={totalPages} onChange={(p) => { setPage(p) }} />
     </div>
   )
 }

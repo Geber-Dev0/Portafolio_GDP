@@ -38,3 +38,13 @@ export const updateDispatch = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: 'Error al actualizar despacho' });
   }
 };
+
+export const deleteDispatch = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const result = await dispatchService.deleteDispatch(id);
+    res.json({ success: true, data: result });
+  } catch {
+    res.status(500).json({ success: false, message: 'Error al eliminar despacho' });
+  }
+};

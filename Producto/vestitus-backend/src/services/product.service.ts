@@ -12,6 +12,7 @@ export interface ProductPayload {
   is_available?: boolean;
   size?: string;
   color?: string;
+  collection?: string;
 }
 
 export interface ProductFilters {
@@ -159,8 +160,7 @@ export const checkAvailabilityByDateRange = async (productId: string, startDate:
     .select('id, start_date, end_date, status')
     .eq('product_id', productId)
     .in('status', ['active', 'confirmed', 'pending'])
-    .lte('start_date', endDate)
-    .gte('end_date', startDate);
+    .or(`start_date.lte.${endDate},end_date.gte.${startDate}`);
 
   if (rentalError) throw rentalError;
 
