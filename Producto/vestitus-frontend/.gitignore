@@ -30,3 +30,7 @@ doc/
 agents.md
 context.md
 specs.md
+
+# Test artifacts
+test-results/
+playwright-report/
